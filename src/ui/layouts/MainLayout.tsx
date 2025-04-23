@@ -1,65 +1,31 @@
-import { ReactNode, useState } from 'react';
-import { useSelector, useDispatch } from 'react-redux';
-import { AppDispatch, RootState } from '@/store';
-import { useTranslation } from 'react-i18next';
-import { setLanguage } from '@/store/slices/languageSlice';
-import { Navbar } from '@/components/shared/Navbar';
-import { Sidebar } from '@/components/shared/Sidebar';
-import { MobileMenu } from '@/components/shared/MobileMenu';
-import { Footer } from '@/components/shared/Footer';
-import { Button } from '@/components/ui/button';
-import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
-import { Menu } from 'lucide-react';
+import { ReactNode, useState } from "react";
+import { useMediaQuery } from "@/hooks/useMediaQuery";
+import { EventsDrawer } from "../shared/EventsDrawer";
+import { cn } from "@/lib/utils";
 
 interface MainLayoutProps {
   children: ReactNode;
 }
 
 export function MainLayout({ children }: MainLayoutProps) {
-  const { t } = useTranslation();
-  const dispatch = useDispatch<AppDispatch>();
-  const { currentLanguage } = useSelector((state: RootState) => state.language);
-  const { user, isAuthenticated } = useSelector((state: RootState) => state.auth);
-  const [sidebarOpen, setSidebarOpen] = useState(false);
-
-  const changeLanguage = (lang: string) => {
-    dispatch(setLanguage(lang));
-  };
+  const [isEventsDrawerOpen, setIsEventsDrawerOpen] = useState(false);
+  const isMobile = useMediaQuery("(max-width: 768px)");
 
   return (
-    <div className="flex min-h-screen flex-col">
-      <Navbar 
-        user={user} 
-        isAuthenticated={isAuthenticated} 
-        currentLanguage={currentLanguage}
-        onChangeLanguage={changeLanguage}
+    <div className="min-h-screen bg-background">
+      <EventsDrawer
+        isOpen={isEventsDrawerOpen}
+        onClose={() => setIsEventsDrawerOpen(false)}
       />
-      
-      <div className="flex flex-1">
-        {/* שייט לתצוגה במובייל */}
-        <Sheet>
-          <SheetTrigger asChild className="lg:hidden">
-            <Button variant="ghost" size="icon" className="h-10 w-10">
-              <Menu className="h-6 w-6" />
-            </Button>
-          </SheetTrigger>
-          <SheetContent side="right" className="p-0">
-            <Sidebar />
-          </SheetContent>
-        </Sheet>
-        
-        {/* סיידבר לתצוגות גדולות */}
-        <aside className="hidden lg:block w-64 shrink-0 border-l">
-          <Sidebar />
-        </aside>
-        
-        {/* תוכן ראשי */}
-        <main className="flex-1">
-          {children}
-        </main>
-      </div>
-      
-      <Footer />
+      <main
+        className={cn(
+          "pt-16",
+          isMobile ? "pl-0" : "pl-64",
+          isEventsDrawerOpen && "pr-80"
+        )}
+      >
+        {children}
+      </main>
     </div>
   );
 }

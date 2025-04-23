@@ -1,8 +1,41 @@
 @import "tailwindcss";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: var(--plime);
+  --foreground: var(--pgreendarker);
+  --radius: 0.625rem;
+  --card: var(--plime-light);
+  --card-foreground: var(--pgreendarker);
+  --popover: var(--plime-light);
+  --popover-foreground: var(--pgreendarker);
+  --primary: var(--pgreen);
+  --primary-foreground: var(--plime);
+  --secondary: var(--pavocado);
+  --secondary-foreground: var(--pgreendark);
+  --muted: var(--pavocado-light);
+  --muted-foreground: var(--pgreendark);
+  --accent: var(--pavocado);
+  --accent-foreground: var(--pgreendark);
+  --destructive: var(--pgreendarker);
+  --border: var(--plime-dark);
+  --input: var(--plime-dark);
+  --ring: var(--pgreen);
+  --chart-1: var(--plime);
+  --chart-2: var(--pavocado);
+  --chart-3: var(--pgreen);
+  --chart-4: var(--plime-dark);
+  --chart-5: var(--pavocado-dark);
+  --sidebar: var(--plime-light);
+  --sidebar-foreground: var(--pgreendarker);
+  --sidebar-primary: var(--pgreen);
+  --sidebar-primary-foreground: var(--plime);
+  --sidebar-accent: var(--pavocado);
+  --sidebar-accent-foreground: var(--pgreendark);
+  --sidebar-border: var(--plime-dark);
+  --sidebar-ring: var(--pgreen);
 }
 
 @theme inline {
@@ -10,12 +43,45 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar: var(--sidebar);
+  --color-chart-5: var(--chart-5);
+  --color-chart-4: var(--chart-4);
+  --color-chart-3: var(--chart-3);
+  --color-chart-2: var(--chart-2);
+  --color-chart-1: var(--chart-1);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --background: var(--pgreendark);
+    --foreground: var(--plime);
   }
 }
 
@@ -23,4 +89,60 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
+}
+
+.dark {
+  --background: var(--pgreendarker);
+  --foreground: var(--plime);
+  --card: var(--pgreen);
+  --card-foreground: var(--plime);
+  --popover: var(--pgreen);
+  --popover-foreground: var(--plime);
+  --primary: var(--plime-dark);
+  --primary-foreground: var(--pgreendarker);
+  --secondary: var(--pavocado-dark);
+  --secondary-foreground: var(--plime);
+  --muted: var(--pgreendark);
+  --muted-foreground: var(--plime-light);
+  --accent: var(--pgreendark);
+  --accent-foreground: var(--plime);
+  --destructive: var(--pgreendarker);
+  --border: var(--plime-light);
+  --input: var(--plime-light);
+  --ring: var(--pavocado);
+  --chart-1: var(--pgreen);
+  --chart-2: var(--pavocado);
+  --chart-3: var(--plime);
+  --chart-4: var(--pgreendark);
+  --chart-5: var(--pavocado-light);
+  --sidebar: var(--pgreen);
+  --sidebar-foreground: var(--plime);
+  --sidebar-primary: var(--plime);
+  --sidebar-primary-foreground: var(--pgreendarker);
+  --sidebar-accent: var(--pgreendark);
+  --sidebar-accent-foreground: var(--plime);
+  --sidebar-border: var(--plime-light);
+  --sidebar-ring: var(--pavocado);
+}
+
+:root,
+.dark {
+  --plime: oklch(0.736 0.184 96.58);
+  --plime-light: oklch(0.81 0.148 96.58);
+  --plime-dark: oklch(0.625 0.2 96.58);
+  --pavocado: oklch(0.662 0.179 100);
+  --pavocado-light: oklch(0.73 0.13 100);
+  --pavocado-dark: oklch(0.58 0.18 100);
+  --pgreen: oklch(0.57 0.24 132);
+  --pgreendark: oklch(0.35 0.18 145);
+  --pgreendarker: oklch(0.13 0.06 145);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
 }
