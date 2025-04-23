@@ -1,5 +1,8 @@
 {
     "direction": "ltr",
+    "index": {
+      "title": "GOAL GG"
+    },
     "loginWidget": {
       "loginHeader": {
         "welcomeBack": "Welcome back!"

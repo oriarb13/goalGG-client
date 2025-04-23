@@ -2,6 +2,7 @@ import { ReactNode, useState } from "react";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
 import { EventsDrawer } from "../shared/EventsDrawer";
 import { cn } from "@/lib/utils";
+import { MainMenu } from "../shared/menu/MainMenu";
 
 interface MainLayoutProps {
   children: ReactNode;
@@ -13,6 +14,7 @@ export function MainLayout({ children }: MainLayoutProps) {
 
   return (
     <div className="min-h-screen bg-background">
+      <MainMenu />
       <EventsDrawer
         isOpen={isEventsDrawerOpen}
         onClose={() => setIsEventsDrawerOpen(false)}
