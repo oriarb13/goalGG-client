@@ -1,8 +1,9 @@
 import { ReactNode, useState } from "react";
-import { useMediaQuery } from "@/hooks/useMediaQuery";
 import { EventsDrawer } from "../shared/EventsDrawer";
 import { cn } from "@/lib/utils";
 import { MainMenu } from "../shared/menu/MainMenu";
+import Image from "next/image";
+import fieldBgImage from "@/assets/images/field-bg.png";
 
 interface MainLayoutProps {
   children: ReactNode;
@@ -10,22 +11,22 @@ interface MainLayoutProps {
 
 export function MainLayout({ children }: MainLayoutProps) {
   const [isEventsDrawerOpen, setIsEventsDrawerOpen] = useState(false);
-  const isMobile = useMediaQuery("(max-width: 768px)");
-
   return (
-    <div className="min-h-screen bg-background">
+    <div className="max-h-screen bg-background relative overflow-y-hidden">
+      <Image
+        src={fieldBgImage}
+        alt="Background"
+        fill
+        priority
+        quality={100}
+        className="absolute inset-0 object-cover z-0"
+      />
       <MainMenu />
       <EventsDrawer
         isOpen={isEventsDrawerOpen}
         onClose={() => setIsEventsDrawerOpen(false)}
       />
-      <main
-        className={cn(
-          "pt-16",
-          isMobile ? "pl-0" : "pl-64",
-          isEventsDrawerOpen && "pr-80"
-        )}
-      >
+      <main className={cn("pt-16", isEventsDrawerOpen && "pr-80")}>
         {children}
       </main>
     </div>

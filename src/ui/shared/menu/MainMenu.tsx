@@ -8,7 +8,7 @@ import { cn } from "@/lib/utils";
 import { LanguageSelectMenu } from "./LanguageSelectMenu";
 import { LoginModal } from "./LoginModal";
 import { SignUpModal } from "./SignupModal";
-
+import logoImage from "@/assets/images/logo.png";
 interface MenuItem {
   icon?: React.ReactNode;
   label: string;
@@ -59,7 +59,7 @@ const MainMenu = () => {
       },
     },
     {
-      label: t("mainMenu.signUp"),
+      label: t("mainMenu.register"),
       isClicked: false,
       onClick: () => {
         setIsSignUpModalOpen(true);
@@ -79,17 +79,17 @@ const MainMenu = () => {
               className="p-0"
             >
               <Image
-                src="/assets/images/logo.png"
+                src={logoImage}
                 alt="Logo"
                 width={100}
-                height={40}
-                className="h-10 w-auto"
+                height={100}
+                className="h-12 w-auto"
               />
             </Button>
           </div>
 
           {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center space-x-4">
+          <div className="hidden md:flex  justify-around w-full">
             {landingPageMenuItems.map((item, index) => (
               <Button
                 key={index}

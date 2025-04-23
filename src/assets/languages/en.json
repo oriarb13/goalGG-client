@@ -1,54 +1,19 @@
 {
-    "direction": "ltr",
-    "index": {
-      "title": "GOAL GG"
-    },
-    "loginWidget": {
-      "loginHeader": {
-        "welcomeBack": "Welcome back!"
-      },
-      "loginForm": {
-        "emailAddress": "Email address",
-        "password": "Password",
-        "rememberMe": "Remember me",
-        "forgotPassword?": "Forgot password?",
-        "logIn": "Log in",
-        "wrongEmailOrPassword": "Wrong email or password"
-      },
-      "forgetPasswordForm": {
-        "emailAddress": "Email Address",
-        "backToLoginPage": "back to login page",
-        "continue": "Continue",
-        "resetPassword": "Reset password",
-        "enterTheEmailAssociated": "Enter the email associated with your account, and we'll send you a link to reset your password",
-        "invalidEmail": "Invalid email"
-      },
-      "createPassword": {
-        "welcomeToRelyon": "Welcome to Relyon!",
-        "createAPassword": "Create a password to complete registration",
-        "enterEmail": "Enter email",
-        "enterPassword": "Enter password",
-        "minimum8Characters": "Minimum 8 characters",
-        "uppercaseAndLowerCaseLetters": "Uppercase and lowercase letters",
-        "AtLeastOneNumber": "At least one number",
-        "AtLeastOneSymbol": "At least one symbol",
-        "confirmPassword": "Confirm Password",
-        "signUp": "Sign Up",
-        "passwordValidation": {
-          "minLength": "Password must be at least 8 characters long.",
-          "uppercase": "Password must contain at least one uppercase letter.",
-          "lowercase": "Password must contain at least one lowercase letter.",
-          "number": "Password must contain at least one number.",
-          "specialCharacter": "Password must contain at least one special symbol."
-        }
-      }
-    },
-  
-    "common": {
-      "not_found": "Not found",
-      "not_found_description": "Information you requested is missing or has been removed.",
-      "loading": "Loading...",
-      "saving": "Saving...",
-      "saveChanges": "Save Changes"
-    }
-}  
+  "direction": "ltr",
+  "mainMenu": {
+    "logout": "Logout",
+    "profile": "Profile",
+    "settings": "Settings",
+    "help": "Help",
+    "ourStory": "Our Story",
+    "contact": "Contact",
+    "login": "Login",
+    "register": "Register"
+  },
+  "index": {
+    "title": "GOAL GG",
+    "friendly": "Friendly",
+    "professional": "Professional",
+    "description": "Take your hobby one goal further with"
+  }
+}

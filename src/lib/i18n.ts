@@ -30,7 +30,7 @@ export function changeLanguage(lang: string) {
   if (supportedLanguages.includes(lang)) {
     i18n.changeLanguage(lang);
     document.documentElement.lang = lang;
-    document.documentElement.dir = ['he', 'ar'].includes(lang) ? 'rtl' : 'ltr';
+    // document.documentElement.dir = ['he', 'ar'].includes(lang) ? 'rtl' : 'ltr';
   }
 }
 

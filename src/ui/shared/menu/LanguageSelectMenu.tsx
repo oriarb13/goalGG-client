@@ -32,6 +32,7 @@ export const LanguageSelectMenu = ({
   const [isOpen, setIsOpen] = useState(false);
 
   const handleLanguageChange = (langCode: string) => {
+    localStorage.setItem("language", langCode);
     dispatch(setLanguage(langCode));
     setIsOpen(false);
   };
