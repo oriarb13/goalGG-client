@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
+import { z } from "zod";
 import {
   Dialog,
   DialogContent,
@@ -12,41 +13,137 @@ import { Button } from "@/ui/shadCN/button";
 import { Input } from "@/ui/shadCN/input";
 import { Label } from "@/ui/shadCN/label";
 import { Checkbox } from "@/ui/shadCN/checkbox";
-import { X } from "lucide-react";
+import { Separator } from "@/ui/shadCN/separator";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/ui/shadCN/select";
+import { Eye, EyeOff } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 interface SignUpModalProps {
   isOpen: boolean;
   onClose: () => void;
+  onLoginClick?: () => void;
 }
 
-export const SignUpModal = ({ isOpen, onClose }: SignUpModalProps) => {
+// Define the validation schema using Zod
+const signUpSchema = z
+  .object({
+    firstName: z.string().min(2, { message: "First name is required" }),
+    lastName: z.string().min(2, { message: "Last name is required" }),
+    phone: z.string().min(9, { message: "Valid phone number is required" }),
+    email: z.string().email({ message: "Valid email is required" }),
+    password: z
+      .string()
+      .min(8, { message: "Password must be at least 8 characters" }),
+    confirmPassword: z.string(),
+    sportCategory: z.enum(["football", "basketball"], {
+      required_error: "Sport category is required",
+    }),
+    yearOfBirth: z
+      .string()
+      .regex(/^\d{4}$/, { message: "Valid birth year is required" }),
+    region: z.string().min(2, { message: "Region is required" }),
+    city: z.string().min(2, { message: "City is required" }),
+    agreeToTerms: z.boolean().refine((val) => val === true, {
+      message: "You must agree to terms and conditions",
+    }),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: "Passwords don't match",
+    path: ["confirmPassword"],
+  });
+
+type SignUpFormData = z.infer<typeof signUpSchema>;
+
+export const SignUpModal = ({
+  isOpen,
+  onClose,
+  onLoginClick,
+}: SignUpModalProps) => {
   const { t } = useTranslation();
-  const [formData, setFormData] = useState({
-    fullName: "",
+  const [formData, setFormData] = useState<SignUpFormData>({
+    firstName: "",
+    lastName: "",
+    phone: "",
     email: "",
     password: "",
     confirmPassword: "",
+    sportCategory: "football",
+    yearOfBirth: "",
+    region: "",
+    city: "",
     agreeToTerms: false,
   });
+
+  const [errors, setErrors] = useState<Record<string, string>>({});
   const [isLoading, setIsLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
+    // Clear error when user starts typing
+    if (errors[name]) {
+      setErrors((prev) => ({ ...prev, [name]: "" }));
+    }
+  };
+
+  const handleSelectChange = (name: string, value: string) => {
+    setFormData((prev) => ({ ...prev, [name]: value }));
+    if (errors[name]) {
+      setErrors((prev) => ({ ...prev, [name]: "" }));
+    }
   };
 
   const handleCheckboxChange = (checked: boolean) => {
     setFormData((prev) => ({ ...prev, agreeToTerms: checked }));
+    if (errors.agreeToTerms) {
+      setErrors((prev) => ({ ...prev, agreeToTerms: "" }));
+    }
+  };
+
+  const togglePasswordVisibility = () => {
+    setShowPassword(!showPassword);
+  };
+
+  const validateForm = () => {
+    try {
+      signUpSchema.parse(formData);
+      setErrors({});
+      return true;
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        const newErrors: Record<string, string> = {};
+        error.errors.forEach((err) => {
+          if (err.path) {
+            newErrors[err.path[0].toString()] = err.message;
+          }
+        });
+        setErrors(newErrors);
+      }
+      return false;
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (!validateForm()) {
+      return;
+    }
+
     setIsLoading(true);
 
     try {
       // Registration logic would go here
       // For demo purposes, we're just simulating a delay
       await new Promise((resolve) => setTimeout(resolve, 1000));
+      console.log("Form submitted with data:", formData);
 
       // On successful registration
       onClose();
@@ -57,70 +154,130 @@ export const SignUpModal = ({ isOpen, onClose }: SignUpModalProps) => {
     }
   };
 
-  const passwordsMatch = formData.password === formData.confirmPassword;
-  const isFormValid =
-    formData.fullName.trim() !== "" &&
-    formData.email.trim() !== "" &&
-    formData.password.trim() !== "" &&
-    passwordsMatch &&
-    formData.agreeToTerms;
+  const handleLoginClick = () => {
+    onClose();
+    if (onLoginClick) {
+      onLoginClick();
+    }
+  };
+
+  // Generate years for dropdown (from current year - 100 to current year - 5)
+  const currentYear = new Date().getFullYear();
+  const yearOptions = Array.from({ length: 80 }, (_, i) =>
+    (currentYear - i).toString()
+  );
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-md">
-        <DialogHeader>
+      <DialogContent className="top-110  max-h-[90vh] overflow-y-auto pr-14 text-gray-600 bg-[linear-gradient(168deg,#D6CE15_0%,#D6CE15_30%,#A4A71E_50%,#53900F_80%,#1F6521_100%)]">
+        {" "}
+        <DialogHeader className="px-1">
           <DialogTitle className="text-xl font-bold">
             {t("signup.title")}
           </DialogTitle>
-          <DialogDescription>{t("signup.description")}</DialogDescription>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="absolute right-4 top-4"
-            onClick={onClose}
-          >
-            <X className="h-4 w-4" />
-            <span className="sr-only">Close</span>
-          </Button>
+          <DialogDescription className="text-gray-600 flex">
+            <p className="text-sm">{t("signup.alreadyHaveAccount")}</p>
+            <Separator orientation="vertical" className="mx-2" />
+            <p
+              className="text-sm hover:underline hover:text-gray-500 cursor-pointer"
+              onClick={handleLoginClick}
+            >
+              {t("signup.login")}
+            </p>
+          </DialogDescription>
         </DialogHeader>
+        <form onSubmit={handleSubmit} className="space-y-4  px-1 ">
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="firstName">{t("signup.firstNameLabel")}</Label>
+              <Input
+                className="text-black placeholder:text-gray-600"
+                id="firstName"
+                name="firstName"
+                value={formData.firstName}
+                onChange={handleChange}
+                placeholder={t("signup.firstNamePlaceholder")}
+              />
+              {errors.firstName && (
+                <p className="text-xs text-red-500">{errors.firstName}</p>
+              )}
+            </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="lastName">{t("signup.lastNameLabel")}</Label>
+              <Input
+                className="text-black placeholder:text-gray-600"
+                id="lastName"
+                name="lastName"
+                value={formData.lastName}
+                onChange={handleChange}
+                placeholder={t("signup.lastNamePlaceholder")}
+              />
+              {errors.lastName && (
+                <p className="text-xs text-red-500">{errors.lastName}</p>
+              )}
+            </div>
+          </div>
+
           <div className="space-y-2">
-            <Label htmlFor="fullName">{t("signup.fullNameLabel")}</Label>
+            <Label htmlFor="phone">{t("signup.phoneLabel")}</Label>
             <Input
-              id="fullName"
-              name="fullName"
-              value={formData.fullName}
+              className="text-black placeholder:text-gray-600"
+              id="phone"
+              name="phone"
+              type="tel"
+              value={formData.phone}
               onChange={handleChange}
-              placeholder={t("signup.fullNamePlaceholder")}
-              required
+              placeholder={t("signup.phonePlaceholder")}
             />
+            {errors.phone && (
+              <p className="text-xs text-red-500">{errors.phone}</p>
+            )}
           </div>
 
           <div className="space-y-2">
             <Label htmlFor="email">{t("signup.emailLabel")}</Label>
             <Input
+              className="text-black placeholder:text-gray-600"
               id="email"
               name="email"
               type="email"
               value={formData.email}
               onChange={handleChange}
               placeholder={t("signup.emailPlaceholder")}
-              required
             />
+            {errors.email && (
+              <p className="text-xs text-red-500">{errors.email}</p>
+            )}
           </div>
 
           <div className="space-y-2">
             <Label htmlFor="password">{t("signup.passwordLabel")}</Label>
-            <Input
-              id="password"
-              name="password"
-              type="password"
-              value={formData.password}
-              onChange={handleChange}
-              placeholder={t("signup.passwordPlaceholder")}
-              required
-            />
+            <div className="flex items-center space-x-2">
+              <div className="relative flex-1">
+                <Input
+                  className="text-black placeholder:text-gray-600 pr-10"
+                  id="password"
+                  name="password"
+                  type={showPassword ? "text" : "password"}
+                  value={formData.password}
+                  onChange={handleChange}
+                  placeholder={t("signup.passwordPlaceholder")}
+                />
+                <Button
+                  variant="link"
+                  className="absolute right-0 top-0 h-full px-3 text-gray-600"
+                  type="button"
+                  onClick={togglePasswordVisibility}
+                  aria-label={showPassword ? "Hide password" : "Show password"}
+                >
+                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                </Button>
+              </div>
+            </div>
+            {errors.password && (
+              <p className="text-xs text-red-500">{errors.password}</p>
+            )}
           </div>
 
           <div className="space-y-2">
@@ -128,24 +285,109 @@ export const SignUpModal = ({ isOpen, onClose }: SignUpModalProps) => {
               {t("signup.confirmPasswordLabel")}
             </Label>
             <Input
+              className={cn(
+                "text-black placeholder:text-gray-600",
+                errors.confirmPassword && "border-red-500"
+              )}
               id="confirmPassword"
               name="confirmPassword"
-              type="password"
+              type={showPassword ? "text" : "password"}
               value={formData.confirmPassword}
               onChange={handleChange}
               placeholder={t("signup.confirmPasswordPlaceholder")}
-              required
-              className={
-                formData.confirmPassword && !passwordsMatch
-                  ? "border-red-500"
-                  : ""
-              }
             />
-            {formData.confirmPassword && !passwordsMatch && (
-              <p className="text-xs text-red-500">
-                {t("signup.passwordsMismatch")}
-              </p>
+            {errors.confirmPassword && (
+              <p className="text-xs text-red-500">{errors.confirmPassword}</p>
             )}
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="sportCategory">
+                {t("signup.sportCategoryLabel")}
+              </Label>
+              <Select
+                value={formData.sportCategory}
+                onValueChange={(value) =>
+                  handleSelectChange("sportCategory", value)
+                }
+              >
+                <SelectTrigger className="text-black">
+                  <SelectValue
+                    placeholder={t("signup.sportCategoryPlaceholder")}
+                  />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="football">
+                    {t("signup.sportFootball")}
+                  </SelectItem>
+                  <SelectItem value="basketball">
+                    {t("signup.sportBasketball")}
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+              {errors.sportCategory && (
+                <p className="text-xs text-red-500">{errors.sportCategory}</p>
+              )}
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="yearOfBirth">
+                {t("signup.yearOfBirthLabel")}
+              </Label>
+              <Select
+                value={formData.yearOfBirth}
+                onValueChange={(value) =>
+                  handleSelectChange("yearOfBirth", value)
+                }
+              >
+                <SelectTrigger className="max-w-[188px]">
+                  <SelectValue
+                    placeholder={t("signup.yearOfBirthPlaceholder")}
+                  />
+                </SelectTrigger>
+                <SelectContent className="max-h-60 overflow-y-auto">
+                  {yearOptions.map((year) => (
+                    <SelectItem key={year} value={year}>
+                      {year}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {errors.yearOfBirth && (
+                <p className="text-xs text-red-500">{errors.yearOfBirth}</p>
+              )}
+            </div>
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="region">{t("signup.regionLabel")}</Label>
+              <Input
+                className="text-black placeholder:text-gray-600"
+                id="region"
+                name="region"
+                value={formData.region}
+                onChange={handleChange}
+                placeholder={t("signup.regionPlaceholder")}
+              />
+              {errors.region && (
+                <p className="text-xs text-red-500">{errors.region}</p>
+              )}
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="city">{t("signup.cityLabel")}</Label>
+              <Input
+                className="text-black placeholder:text-gray-600"
+                id="city"
+                name="city"
+                value={formData.city}
+                onChange={handleChange}
+                placeholder={t("signup.cityPlaceholder")}
+              />
+              {errors.city && (
+                <p className="text-xs text-red-500">{errors.city}</p>
+              )}
+            </div>
           </div>
 
           <div className="flex items-center space-x-2">
@@ -161,17 +403,25 @@ export const SignUpModal = ({ isOpen, onClose }: SignUpModalProps) => {
               {t("signup.agreeToTerms")}
             </Label>
           </div>
+          {errors.agreeToTerms && (
+            <p className="text-xs text-red-500">{errors.agreeToTerms}</p>
+          )}
 
-          <DialogFooter className="sm:justify-between">
+          <DialogFooter className="sm:justify-between mt-10">
             <Button
               variant="outline"
               type="button"
               onClick={onClose}
               disabled={isLoading}
+              className="text-gray-600 hover:text-gray-300 cursor-pointer"
             >
               {t("common.cancel")}
             </Button>
-            <Button type="submit" disabled={isLoading || !isFormValid}>
+            <Button
+              type="submit"
+              disabled={isLoading}
+              className="text-gray-600 hover:text-gray-300 cursor-pointer"
+            >
               {isLoading ? t("common.loading") : t("signup.submit")}
             </Button>
           </DialogFooter>

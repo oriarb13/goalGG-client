@@ -21,9 +21,8 @@ const IndexWidget = () => {
         alt="Friends Basketball"
         width={880}
         height={800}
-        className="opacity-90 absolute bottom-40 right-0 object-cover z-0"
+        className="opacity-60 absolute bottom-40 right-0 object-cover z-0"
       />
-
 
       <Card className="w-1/4 h-3/5 rounded-none absolute opacity-85 top-66 left-130 z-10 bg-[linear-gradient(168deg,#D6CE15_0%,#D6CE15_30%,#A4A71E_50%,#53900F_80%,#1F6521_100%)]">
         <div className="flex flex-col items-center text-slate-200 h-full mt-34">

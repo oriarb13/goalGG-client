@@ -1,5 +1,10 @@
 {
   "direction": "ltr",
+  "common": {
+    "loading": "Loading...",
+    "cancel": "Cancel",
+    "submit": "Submit"
+  },
   "mainMenu": {
     "logout": "Logout",
     "profile": "Profile",
@@ -10,10 +15,58 @@
     "login": "Login",
     "register": "Register"
   },
+  "form": {
+    "email": "Email",
+    "password": "Password",
+    "forgotPassword": "Forgot Password?",
+    "submit": "Submit",
+    "cancel": "Cancel"
+  },
   "index": {
     "title": "GOAL GG",
     "friendly": "Friendly",
     "professional": "Professional",
     "description": "Take your hobby one goal further with"
+  },
+  "loginModal": {
+    "dontHaveAccountYet": "Don't have an account yet?",
+    "clickHere": "Click here to register",
+    "login": "Login",
+    "register": "Register"
+  },
+  "signup": {
+    "alreadyHaveAccount": "Already have an account?",
+    "clickHere": "Click here to login",
+    "register": "Register",
+    "title": "Signup",
+    "fullNameLabel": "Full Name",
+    "emailLabel": "Email",
+    "passwordLabel": "Password",
+    "login": "Log in",
+    "fullNamePlaceholder": "Enter your full name",
+    "emailPlaceholder": "Enter your email",
+    "passwordPlaceholder": "Enter your password",
+    "confirmPasswordPlaceholder": "Confirm your password",
+    "agreeToTerms": "I agree to the terms and conditions",
+    "clickHereToLogin": "Click here to login",
+    "confirmPasswordLabel": "Confirm Password",
+    "clickHereToRegister": "Click here to register",
+    "submit": "Submit",
+    "cancel": "Cancel",
+    "phoneLabel": "Phone Number",
+    "phonePlaceholder": "Enter your phone number",
+    "yearOfBirthLabel": "Year of Birth",
+    "yearOfBirthPlaceholder": "Enter your year of birth",
+    "regionLabel": "Region",
+    "regionPlaceholder": "Enter your region",
+    "cityLabel": "City",
+    "cityPlaceholder": "Enter your city",
+    "firstNameLabel": "First Name",
+    "firstNamePlaceholder": "Enter your first name",
+    "lastNameLabel": "Last Name",
+    "lastNamePlaceholder": "Enter your last name",
+    "sportCategoryLabel": "Sport Category",
+    "sportFootball": "Football",
+    "sportBasketball": "Basketball"
   }
 }
