@@ -9,7 +9,7 @@ import {
 } from "@/ui/shadCN/dropdown-menu";
 import { ChevronDown, Globe } from "lucide-react";
 import { setLanguage } from "@/store/languageSlice";
-import { RootState } from "@/store/index";
+import { RootState } from "@/store/store";
 import { cn } from "@/lib/utils";
 
 interface LanguageSelectMenuProps {

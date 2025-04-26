@@ -1,6 +1,9 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { z } from "zod";
+import { useRouter } from "next/router";
+import useUser from "@/hooks/useUser"; // ייבוא הוק useUser
+import { useLogin } from "@/hooks/useUser"; // ייבוא הוק useLogin
 import {
   Dialog,
   DialogContent,
@@ -35,13 +38,17 @@ export const LoginModal = ({
   onSignUpClick,
 }: LoginModalProps) => {
   const { t } = useTranslation();
+  const router = useRouter();
   const [formData, setFormData] = useState<LoginFormData>({
     email: "",
     password: "",
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
-  const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+
+  // שימוש בהוקים המותאמים
+  const { login, loading: isLoginLoading } = useLogin();
+  const { error: authError } = useUser();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -78,20 +85,21 @@ export const LoginModal = ({
       return;
     }
 
-    setIsLoading(true);
-
     try {
-      // Authentication logic would go here
-      // For demo purposes, we're just simulating a delay
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      console.log("Login submitted with data:", formData);
+      // ביצוע כניסה באמצעות הוק useLogin
+      await login({
+        email: formData.email,
+        password: formData.password,
+      });
 
-      // On successful login
+      // אם הגענו לכאן, ההתחברות הצליחה
       onClose();
+
+      // ניתן להוסיף ניווט לדף אחר אחרי התחברות מוצלחת
+      router.push("/dashboard");
     } catch (error) {
-      console.error("Login error:", error);
-    } finally {
-      setIsLoading(false);
+      // השגיאות מטופלות ב-useLogin ונשמרות ב-Redux
+      console.error("Login process failed:", error);
     }
   };
 
@@ -126,6 +134,13 @@ export const LoginModal = ({
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4">
+          {/* הצג שגיאת אימות אם קיימת */}
+          {authError && (
+            <div className="p-2 bg-red-100 text-red-800 rounded-md text-sm">
+              {authError.message}
+            </div>
+          )}
+
           <div className="space-y-2">
             <Label htmlFor="email">{t("form.email")}</Label>
             <Input
@@ -183,17 +198,17 @@ export const LoginModal = ({
               variant="outline"
               type="button"
               onClick={onClose}
-              disabled={isLoading}
+              disabled={isLoginLoading}
               className="text-gray-600 hover:text-gray-300 cursor-pointer"
             >
               {t("common.cancel")}
             </Button>
             <Button
               type="submit"
-              disabled={isLoading}
+              disabled={isLoginLoading}
               className="text-gray-600 hover:text-gray-300 cursor-pointer"
             >
-              {isLoading ? t("common.loading") : t("common.submit")}
+              {isLoginLoading ? t("common.loading") : t("common.submit")}
             </Button>
           </DialogFooter>
         </form>
