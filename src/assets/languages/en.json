@@ -32,7 +32,8 @@
     "dontHaveAccountYet": "Don't have an account yet?",
     "clickHere": "Click here to register",
     "login": "Login",
-    "register": "Register"
+    "register": "Register",
+    "emailOrPasswordError": "Email or password is incorrect"
   },
   "signup": {
     "alreadyHaveAccount": "Already have an account?",

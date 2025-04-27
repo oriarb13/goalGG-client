@@ -31,7 +31,7 @@ import { PhoneInput } from "../phone-input";
 interface SignUpModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onLoginClick?: () => void;
+  openLoginModal: () => void;
 }
 
 // Define the validation schema using Zod
@@ -72,7 +72,7 @@ type SignUpFormData = z.infer<typeof signUpSchema>;
 export const SignUpModal = ({
   isOpen,
   onClose,
-  onLoginClick,
+  openLoginModal,
 }: SignUpModalProps) => {
   const { t } = useTranslation();
   const [formData, setFormData] = useState<SignUpFormData>({
@@ -182,23 +182,17 @@ export const SignUpModal = ({
 
       await register(submitData);
       setIsSuccess(true);
+      setTimeout(() => {
+        setIsSuccess(false);
+        setIsFailed(false);
+        setErrors({});
+        openLoginModal();
+      }, 5000);
     } catch (error) {
       console.log("Registration error:", error);
       setIsFailed(true);
-      setTimeout(() => {
-        onClose();
-        setIsSuccess(false);
-        setIsFailed(false);
-      }, 5000);
     } finally {
       setIsLoading(false);
-    }
-  };
-
-  const handleLoginClick = () => {
-    onClose();
-    if (onLoginClick) {
-      onLoginClick();
     }
   };
 
@@ -221,7 +215,7 @@ export const SignUpModal = ({
             <Separator orientation="vertical" className="mx-2" />
             <p
               className="text-sm hover:underline hover:text-gray-500 cursor-pointer"
-              onClick={handleLoginClick}
+              onClick={openLoginModal}
             >
               {t("signup.login")}
             </p>
@@ -446,15 +440,17 @@ export const SignUpModal = ({
           {errors.agreeToTerms && (
             <p className="text-xs text-red-500">{errors.agreeToTerms}</p>
           )}
-          {isFailed && (
-            <p className="text-xs  text-red-500">{t("signup.failed")}</p>
-          )}
 
           <DialogFooter className="sm:justify-between mt-10">
             <Button
               variant="outline"
               type="button"
-              onClick={onClose}
+              onClick={() => {
+                onClose();
+                setIsSuccess(false);
+                setIsFailed(false);
+                setErrors({});
+              }}
               disabled={isLoading}
               className="text-gray-600 hover:text-gray-300 cursor-pointer w-[100px]"
             >
@@ -469,6 +465,11 @@ export const SignUpModal = ({
               {isRegisterLoading ? <DotsLoader size={5} /> : t("common.submit")}
             </Button>
           </DialogFooter>
+          {isFailed && (
+            <p className="text-xl pt-5 text-center text-red-500">
+              {t("signup.failed")}
+            </p>
+          )}
           {isSuccess && (
             <p className="text-xl pt-5 text-center text-amber-500">
               {t("signup.userCreatedSuccessfully")}

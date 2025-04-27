@@ -20,7 +20,7 @@ import DotsLoader from "@/assets/animations/DotsLoader";
 interface LoginModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSignUpClick?: () => void;
+  openSignUpModal: () => void;
 }
 
 // Define the validation schema using Zod
@@ -34,7 +34,7 @@ type LoginFormData = z.infer<typeof loginSchema>;
 export const LoginModal = ({
   isOpen,
   onClose,
-  onSignUpClick,
+  openSignUpModal,
 }: LoginModalProps) => {
   const { t } = useTranslation();
   const router = useRouter();
@@ -107,13 +107,6 @@ export const LoginModal = ({
     setShowPassword(!showPassword);
   };
 
-  const handleSignUpClick = () => {
-    onClose();
-    if (onSignUpClick) {
-      onSignUpClick();
-    }
-  };
-
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-md text-gray-600 bg-[linear-gradient(168deg,#D6CE15_0%,#D6CE15_30%,#A4A71E_50%,#53900F_80%,#1F6521_100%)]">
@@ -126,7 +119,7 @@ export const LoginModal = ({
             <Separator orientation="vertical" className="mx-2" />
             <p
               className="text-sm hover:underline hover:text-gray-500 cursor-pointer"
-              onClick={handleSignUpClick}
+              onClick={openSignUpModal}
             >
               {t("loginModal.clickHere")}
             </p>

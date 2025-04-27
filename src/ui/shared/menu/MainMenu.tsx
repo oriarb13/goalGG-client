@@ -67,6 +67,22 @@ const MainMenu = () => {
     },
   ];
 
+  const openLoginModal = () => {
+    console.log("openLoginModal");
+    setIsSignUpModalOpen(false);
+    setTimeout(() => {
+      setIsLoginModalOpen(true);
+    }, 100);
+  };
+
+  const openSignUpModal = () => {
+    console.log("openSignUpModal");
+    setIsLoginModalOpen(false);
+    setTimeout(() => {
+      setIsSignUpModalOpen(true);
+    }, 100);
+  };
+
   return (
     <>
       <header className="fixed top-0 left-0 right-0 bg-background border-b border-border z-50">
@@ -161,10 +177,12 @@ const MainMenu = () => {
       <LoginModal
         isOpen={isLoginModalOpen}
         onClose={() => setIsLoginModalOpen(false)}
+        openSignUpModal={openSignUpModal}
       />
       <SignUpModal
         isOpen={isSignUpModalOpen}
         onClose={() => setIsSignUpModalOpen(false)}
+        openLoginModal={openLoginModal}
       />
     </>
   );
