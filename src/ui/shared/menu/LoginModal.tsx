@@ -2,8 +2,7 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { z } from "zod";
 import { useRouter } from "next/router";
-import useUser from "@/hooks/useUser"; // ייבוא הוק useUser
-import { useLogin } from "@/hooks/useUser"; // ייבוא הוק useLogin
+import { useLogin, useConnectedUser } from "@/api/queryHooks/users-query"; // Import the useConnectedUser hook
 import {
   Dialog,
   DialogContent,
@@ -17,7 +16,7 @@ import { Input } from "@/ui/shadCN/input";
 import { Label } from "@/ui/shadCN/label";
 import { Separator } from "@/ui/shadCN/separator";
 import { Eye, EyeOff } from "lucide-react";
-
+import DotsLoader from "@/assets/animations/DotsLoader";
 interface LoginModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -45,14 +44,15 @@ export const LoginModal = ({
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [showPassword, setShowPassword] = useState(false);
-
-  // שימוש בהוקים המותאמים
-  const { login, loading: isLoginLoading } = useLogin();
-  const { error: authError } = useUser();
+  const [isFailed, setIsFailed] = useState(false);
+  // Use the proper hooks
+  const { mutateAsync: login, isPending: isLoginLoading } = useLogin();
+  const { error: authError } = useConnectedUser();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
+    setIsFailed(false);
     // Clear error when user starts typing
     if (errors[name]) {
       setErrors((prev) => ({ ...prev, [name]: "" }));
@@ -86,20 +86,20 @@ export const LoginModal = ({
     }
 
     try {
-      // ביצוע כניסה באמצעות הוק useLogin
+      // Use the login mutation from the hook
       await login({
         email: formData.email,
         password: formData.password,
       });
 
-      // אם הגענו לכאן, ההתחברות הצליחה
+      // If we reach here, login was successful
       onClose();
 
-      // ניתן להוסיף ניווט לדף אחר אחרי התחברות מוצלחת
-      router.push("/dashboard");
+      // Navigate to dashboard after successful login
+      router.push("/home");
     } catch (error) {
-      // השגיאות מטופלות ב-useLogin ונשמרות ב-Redux
-      console.error("Login process failed:", error);
+      setIsFailed(true);
+      console.log(error);
     }
   };
 
@@ -134,7 +134,7 @@ export const LoginModal = ({
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4">
-          {/* הצג שגיאת אימות אם קיימת */}
+          {/* Display auth error if it exists */}
           {authError && (
             <div className="p-2 bg-red-100 text-red-800 rounded-md text-sm">
               {authError.message}
@@ -193,22 +193,27 @@ export const LoginModal = ({
             )}
           </div>
 
+          {isFailed && (
+            <p className="text-xs  text-red-500 text-center">
+              {t("loginModal.emailOrPasswordError")}
+            </p>
+          )}
           <DialogFooter className="sm:justify-between mt-10">
             <Button
               variant="outline"
               type="button"
               onClick={onClose}
               disabled={isLoginLoading}
-              className="text-gray-600 hover:text-gray-300 cursor-pointer"
+              className="text-gray-600 hover:text-gray-300 cursor-pointer w-[100px]"
             >
               {t("common.cancel")}
             </Button>
             <Button
               type="submit"
               disabled={isLoginLoading}
-              className="text-gray-600 hover:text-gray-300 cursor-pointer"
+              className="text-gray-600 hover:text-gray-300 cursor-pointer w-[100px]"
             >
-              {isLoginLoading ? t("common.loading") : t("common.submit")}
+              {isLoginLoading ? <DotsLoader size={5} /> : t("common.submit")}
             </Button>
           </DialogFooter>
         </form>

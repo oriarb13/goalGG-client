@@ -23,6 +23,7 @@ import {
 } from "@/ui/shadCN/select";
 import { Eye, EyeOff } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useRegister } from "@/api/queryHooks/users-query";
 
 interface SignUpModalProps {
   isOpen: boolean;
@@ -83,6 +84,7 @@ export const SignUpModal = ({
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const { mutateAsync: register, isPending: isRegisterLoading } = useRegister();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -137,16 +139,9 @@ export const SignUpModal = ({
       return;
     }
 
-    setIsLoading(true);
 
     try {
-      // Registration logic would go here
-      // For demo purposes, we're just simulating a delay
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      console.log("Form submitted with data:", formData);
-
-      // On successful registration
-      onClose();
+      await register(formData);
     } catch (error) {
       console.error("Registration error:", error);
     } finally {

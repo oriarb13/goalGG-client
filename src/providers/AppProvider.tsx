@@ -9,41 +9,69 @@ import { MainLayout } from "@/ui/layouts/MainLayout";
 import { setLanguage } from "@/store/languageSlice";
 import { fetchCurrentUser } from "@/store/userSlice";
 import { useRouter } from "next/router";
+import QueryProvider from "./QueryProvider";
+// רשימת הנתיבים הציבוריים שלא דורשים הרשאה
+const publicRoutes = ["/", "/about"];
 
 interface AppProviderProps {
   children: ReactNode;
 }
 
 export function AppProvider({ children }: AppProviderProps) {
-  const router = useRouter(); // העברת useRouter לתוך הקומפוננטה
+  const router = useRouter();
 
   useEffect(() => {
-    // Only run on client side
+    // פועל רק בצד הלקוח
     if (typeof window !== "undefined") {
-      // Load language settings
+      // טעינת הגדרות שפה
       const savedLanguage = localStorage.getItem("language");
       if (savedLanguage) {
         store.dispatch(setLanguage(savedLanguage));
       }
 
-      // Check if user is logged in
+      // בדיקה אם המשתמש מחובר ועדכון הסטייט ברידקס
       const token = localStorage.getItem("token");
+
       if (token) {
-        store.dispatch(fetchCurrentUser());
-      } else if (router.pathname !== "/" && router.pathname !== "/about") {
+        // יש טוקן - ננסה לקבל את המשתמש
+        store.dispatch(fetchCurrentUser({ router }));
+      } else if (!publicRoutes.includes(router.pathname)) {
+        // אין טוקן והדף לא ציבורי - ננתב לעמוד הבית
         router.push("/");
       }
     }
-  }, [router]); // הוספת router כתלות
+  }, [router, router.pathname]);
+
+  // הוספנו כאן בדיקה שתבדוק אם המשתמש משנה נתיב לדף מוגן
+  useEffect(() => {
+    const handleRouteChange = () => {
+      const token = localStorage.getItem("token");
+
+      // אם מנסים לגשת לדף מוגן בלי טוקן, ננתב לעמוד הבית
+      if (!token && !publicRoutes.includes(router.pathname)) {
+        router.push("/");
+      }
+    };
+
+    // מאזין לאירועי שינוי נתיב
+    router.events.on("routeChangeComplete", handleRouteChange);
+
+    // ניקוי המאזין כשהקומפוננטה מתפרקת
+    return () => {
+      router.events.off("routeChangeComplete", handleRouteChange);
+    };
+  }, [router]);
 
   return (
-    <Provider store={store}>
-      <I18nextProvider i18n={i18n}>
-        <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-          <MainLayout>{children}</MainLayout>
-          <Toaster />
-        </ThemeProvider>
-      </I18nextProvider>
-    </Provider>
+    <QueryProvider>
+      <Provider store={store}>
+        <I18nextProvider i18n={i18n}>
+          <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+            <MainLayout>{children}</MainLayout>
+            <Toaster />
+          </ThemeProvider>
+        </I18nextProvider>
+      </Provider>
+    </QueryProvider>
   );
 }
