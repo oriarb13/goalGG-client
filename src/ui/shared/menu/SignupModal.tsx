@@ -469,7 +469,7 @@ export const SignUpModal = ({
               {isRegisterLoading ? <DotsLoader size={5} /> : t("common.submit")}
             </Button>
           </DialogFooter>
-          {!isSuccess && (
+          {isSuccess && (
             <p className="text-xl pt-5 text-center text-amber-500">
               {t("signup.userCreatedSuccessfully")}
             </p>
