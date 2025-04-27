@@ -24,6 +24,9 @@ import {
 import { Eye, EyeOff } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useRegister } from "@/api/queryHooks/users-query";
+import { SportCategoryEnum } from "@/types/enums";
+import DotsLoader from "@/assets/animations/DotsLoader";
+import { PhoneInput } from "../phone-input";
 
 interface SignUpModalProps {
   isOpen: boolean;
@@ -36,19 +39,22 @@ const signUpSchema = z
   .object({
     firstName: z.string().min(2, { message: "First name is required" }),
     lastName: z.string().min(2, { message: "Last name is required" }),
-    phone: z.string().min(9, { message: "Valid phone number is required" }),
+    phone: z.string().min(1, { message: "Phone number is required" }),
     email: z.string().email({ message: "Valid email is required" }),
     password: z
       .string()
       .min(8, { message: "Password must be at least 8 characters" }),
     confirmPassword: z.string(),
-    sportCategory: z.enum(["football", "basketball"], {
-      required_error: "Sport category is required",
-    }),
+    sportCategory: z.enum(
+      [SportCategoryEnum.FOOTBALL, SportCategoryEnum.BASKETBALL],
+      {
+        required_error: "Sport category is required",
+      }
+    ),
     yearOfBirth: z
       .string()
       .regex(/^\d{4}$/, { message: "Valid birth year is required" }),
-    region: z.string().min(2, { message: "Region is required" }),
+    country: z.string().min(2, { message: "Country is required" }),
     city: z.string().min(2, { message: "City is required" }),
     agreeToTerms: z.boolean().refine((val) => val === true, {
       message: "You must agree to terms and conditions",
@@ -74,9 +80,9 @@ export const SignUpModal = ({
     email: "",
     password: "",
     confirmPassword: "",
-    sportCategory: "football",
+    sportCategory: SportCategoryEnum.FOOTBALL,
     yearOfBirth: "",
-    region: "",
+    country: "",
     city: "",
     agreeToTerms: false,
   });
@@ -85,7 +91,7 @@ export const SignUpModal = ({
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const { mutateAsync: register, isPending: isRegisterLoading } = useRegister();
-
+  const [isFailed, setIsFailed] = useState(false);
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
@@ -139,11 +145,19 @@ export const SignUpModal = ({
       return;
     }
 
-
     try {
-      await register(formData);
+      const submitData = {
+        ...formData,
+        yearOfBirth: parseInt(formData.yearOfBirth, 10),
+        phone: {
+          prefix: "+972", // Default prefix, you might want to extract this from the phone input
+          number: formData.phone.replace(/\D/g, ""), // Remove non-digit characters
+        },
+      };
+      await register(submitData);
     } catch (error) {
-      console.error("Registration error:", error);
+      console.log("Registration error:", error);
+      setIsFailed(true);
     } finally {
       setIsLoading(false);
     }
@@ -216,14 +230,15 @@ export const SignUpModal = ({
 
           <div className="space-y-2">
             <Label htmlFor="phone">{t("signup.phoneLabel")}</Label>
-            <Input
-              className="text-black placeholder:text-gray-600"
-              id="phone"
-              name="phone"
-              type="tel"
+            <PhoneInput
+              className="border-gray-400"
               value={formData.phone}
-              onChange={handleChange}
-              placeholder={t("signup.phonePlaceholder")}
+              onChange={(value) => {
+                setFormData((prev) => ({ ...prev, phone: value || "" }));
+              }}
+              international
+              initialValueFormat="national"
+              defaultCountry="IL"
             />
             {errors.phone && (
               <p className="text-xs text-red-500">{errors.phone}</p>
@@ -312,10 +327,10 @@ export const SignUpModal = ({
                   />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="football">
+                  <SelectItem value={SportCategoryEnum.FOOTBALL}>
                     {t("signup.sportFootball")}
                   </SelectItem>
-                  <SelectItem value="basketball">
+                  <SelectItem value={SportCategoryEnum.BASKETBALL}>
                     {t("signup.sportBasketball")}
                   </SelectItem>
                 </SelectContent>
@@ -355,17 +370,17 @@ export const SignUpModal = ({
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="region">{t("signup.regionLabel")}</Label>
+              <Label htmlFor="country">{t("signup.countryLabel")}</Label>
               <Input
                 className="text-black placeholder:text-gray-600"
-                id="region"
-                name="region"
-                value={formData.region}
+                id="country"
+                name="country"
+                value={formData.country}
                 onChange={handleChange}
-                placeholder={t("signup.regionPlaceholder")}
+                placeholder={t("signup.countryPlaceholder")}
               />
-              {errors.region && (
-                <p className="text-xs text-red-500">{errors.region}</p>
+              {errors.country && (
+                <p className="text-xs text-red-500">{errors.country}</p>
               )}
             </div>
 
@@ -401,6 +416,9 @@ export const SignUpModal = ({
           {errors.agreeToTerms && (
             <p className="text-xs text-red-500">{errors.agreeToTerms}</p>
           )}
+          {isFailed && (
+            <p className="text-xs  text-red-500">{t("signup.failed")}</p>
+          )}
 
           <DialogFooter className="sm:justify-between mt-10">
             <Button
@@ -408,16 +426,17 @@ export const SignUpModal = ({
               type="button"
               onClick={onClose}
               disabled={isLoading}
-              className="text-gray-600 hover:text-gray-300 cursor-pointer"
+              className="text-gray-600 hover:text-gray-300 cursor-pointer w-[100px]"
             >
               {t("common.cancel")}
             </Button>
+
             <Button
               type="submit"
-              disabled={isLoading}
-              className="text-gray-600 hover:text-gray-300 cursor-pointer"
+              disabled={isRegisterLoading}
+              className="text-gray-600 hover:text-gray-300 cursor-pointer w-[100px]"
             >
-              {isLoading ? t("common.loading") : t("signup.submit")}
+              {isRegisterLoading ? <DotsLoader size={5} /> : t("common.submit")}
             </Button>
           </DialogFooter>
         </form>

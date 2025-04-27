@@ -7,8 +7,8 @@ export enum UserRoleEnum {
 }
 
 export enum SportCategoryEnum {
-  FOOTBALL = "FOOTBALL",
-  BASKETBALL = "BASKETBALL",
+  FOOTBALL = "football",
+  BASKETBALL = "basketball",
 }
 
 export enum StrongSideEnum {

@@ -45,7 +45,7 @@ export interface User {
   email: string;
   isEmailVerified: boolean;
   phone: Phone;
-  region?: string;
+  country?: string;
   city?: string;
   password?: string; // Not returned by API usually
   accountStatus: AccountStatusEnum;
@@ -60,4 +60,3 @@ export interface User {
   createdAt: Date;
   updatedAt: Date;
 }
-

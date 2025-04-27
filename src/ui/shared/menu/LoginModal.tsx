@@ -194,7 +194,7 @@ export const LoginModal = ({
           </div>
 
           {isFailed && (
-            <p className="text-xs  text-red-500 text-center">
+            <p className="text-xs  text-red-500 ">
               {t("loginModal.emailOrPasswordError")}
             </p>
           )}
