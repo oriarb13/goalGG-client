@@ -72,5 +72,12 @@
     "sportBasketball": "Basketball",
     "userCreatedSuccessfully": "User created successfully",
     "failed": "Failed to create user"
+  },
+  "main": {
+    "fieldChoice": "Find the Perfect Field Near You",
+    "playWithYourFriends": "Create or join Clubs and Play with Your Friends",
+    "friends": "Find new Friends",
+    "or": "Or",
+    "fields": "Find a Field "
   }
 }

@@ -8,13 +8,14 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/ui/shadCN/dropdown-menu";
-import { DownArrow } from "@/assets/icons/DownArrow";
-
+import { ChevronDown } from "lucide-react";
+import { useRouter } from "next/router";
 const ProfileSection = () => {
   const { user } = useAppSelector((state) => state.user);
+  const router = useRouter();
   return (
     <div className="flex gap-1 items-center justify-center">
-      <Avatar>
+      <Avatar onClick={() => router.push("/profile")}>
         <AvatarImage src={user?.image} alt={user?.firstName} />
         <AvatarFallback>
           {user?.firstName?.charAt(0)}
@@ -24,7 +25,7 @@ const ProfileSection = () => {
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <div>
-            <DownArrow
+            <ChevronDown
               className="w-15 h-15 text-white "
               size={40}
               color="white"
