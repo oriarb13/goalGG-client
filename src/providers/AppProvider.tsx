@@ -7,10 +7,12 @@ import i18n from "@/lib/i18n";
 import { Toaster } from "@/ui/notifications/Toaster";
 import { MainLayout } from "@/ui/layouts/MainLayout";
 import { setLanguage } from "@/store/languageSlice";
-import { fetchCurrentUser } from "@/store/userSlice";
+import { fetchCurrentUser, setAuthenticating } from "@/store/userSlice";
 import { useRouter } from "next/router";
 import QueryProvider from "./QueryProvider";
+
 const publicRoutes = ["/", "/about"];
+
 interface AppProviderProps {
   children: ReactNode;
 }
@@ -28,9 +30,12 @@ export function AppProvider({ children }: AppProviderProps) {
       const token = localStorage.getItem("token");
 
       if (token) {
-        store.dispatch(fetchCurrentUser({ router }));
-      } else if (!publicRoutes.includes(router.pathname)) {
-        router.push("/");
+        store.dispatch(fetchCurrentUser({ router, showAuthError: false }));
+      } else {
+        store.dispatch(setAuthenticating(false));
+        if (!publicRoutes.includes(router.pathname)) {
+          router.push("/");
+        }
       }
     }
   }, [router, router.pathname]);

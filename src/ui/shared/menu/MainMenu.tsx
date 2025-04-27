@@ -9,7 +9,7 @@ import { LanguageSelectMenu } from "./LanguageSelectMenu";
 import { LoginModal } from "./LoginModal";
 import { SignUpModal } from "./SignupModal";
 import logoImage from "@/assets/images/logo.png";
-
+import ProfileSection from "./ProfileSection";
 // Redux imports
 import { useAppDispatch, useAppSelector } from "@/store/store";
 import { logout } from "@/store/userSlice";
@@ -30,10 +30,6 @@ const MainMenu = () => {
   const [isMobile, setIsMobile] = useState(false);
   const [isSettingsDropdownOpen, setIsSettingsDropdownOpen] = useState(false);
 
-  const user = useAppSelector((state) => state.user.user);
-  const dispatch = useAppDispatch();
-  console.log("user", user);
-
   // Check if we're on mobile
   useEffect(() => {
     const checkIfMobile = () => {
@@ -52,6 +48,11 @@ const MainMenu = () => {
   useEffect(() => {
     setIsMobileMenuOpen(false);
   }, [router.asPath]);
+
+  const { user, loading, isAuthenticating } = useAppSelector(
+    (state) => state.user
+  );
+  const dispatch = useAppDispatch();
 
   const landingPageMenuItems: MenuItem[] = [
     {
@@ -93,18 +94,10 @@ const MainMenu = () => {
       },
     },
     {
-      label: t("mainMenu.profile"),
+      label: "Profile",
       isClicked: false,
-      onClick: () => {
-        router.push("/profile");
-      },
-    },
-    {
-      label: t("mainMenu.logout"),
-      isClicked: false,
-      onClick: () => {
-        dispatch(logout());
-      },
+      icon: <ProfileSection />,
+      onClick: () => {},
     },
   ];
 
@@ -121,6 +114,11 @@ const MainMenu = () => {
       setIsSignUpModalOpen(true);
     }, 100);
   };
+
+  // If authenticating or loading, don't render anything
+  if (isAuthenticating || loading) {
+    return null;
+  }
 
   return (
     <>
@@ -144,7 +142,7 @@ const MainMenu = () => {
           </div>
 
           {/* Desktop Navigation */}
-          <div className="hidden md:flex  justify-around w-full">
+          <div className="hidden md:flex justify-around w-full">
             <Button
               variant={router.asPath === "/about" ? "default" : "ghost"}
               onClick={() => router.push("/about")}
@@ -185,7 +183,7 @@ const MainMenu = () => {
                     item.isClicked && "bg-primary text-primary-foreground"
                   )}
                 >
-                  {item.label}
+                  {item.label === "Profile" ? <ProfileSection /> : item.label}
                 </Button>
               ))}
             <LanguageSelectMenu />

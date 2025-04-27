@@ -3,7 +3,6 @@ import userService from "@/api/services/userService";
 import { User } from "@/types/types";
 import { showSnackBar } from "@/store/snackBarSlice";
 
-// מבנה השגיאות מהשרת
 interface APIError {
   success: boolean;
   status: string;
@@ -11,21 +10,20 @@ interface APIError {
   stack?: string;
 }
 
-// מבנה מצב המשתמש ברידקס
 interface UserState {
   user: User | null;
   loading: boolean;
   error: APIError | null;
+  isAuthenticating: boolean;
 }
 
-// מצב התחלתי
 const initialState: UserState = {
   user: null,
   loading: false,
   error: null,
+  isAuthenticating: true,
 };
 
-// פונקציית עזר לטיפול בשגיאות
 const handleApiError = (error: any): APIError => {
   if (error?.response?.data && !error.response.data.success) {
     return {
@@ -51,16 +49,14 @@ const handleApiError = (error: any): APIError => {
   };
 };
 
-// פונקציה אחת שמטפלת בהבאת המשתמש ועדכון הסטייט
 export const fetchCurrentUser = createAsyncThunk<
   User,
-  { router?: any; showAuthError?: boolean } | undefined, // הוספת אפשרות להצגת הודעת שגיאה
+  { router?: any; showAuthError?: boolean } | undefined,
   { rejectValue: APIError; dispatch: any }
 >("user/fetchCurrentUser", async (params, { rejectWithValue, dispatch }) => {
   try {
     const token = localStorage.getItem("token");
 
-    // auth
     if (!token) {
       if (
         params?.router &&
@@ -71,7 +67,6 @@ export const fetchCurrentUser = createAsyncThunk<
       }
       localStorage.removeItem("token");
 
-      // שימוש ב-dispatch שמועבר על ידי redux-thunk
       if (params?.showAuthError !== false) {
         dispatch(
           showSnackBar({
@@ -89,7 +84,6 @@ export const fetchCurrentUser = createAsyncThunk<
       });
     }
 
-    // get user
     const response = await userService.getConnectedUser();
 
     if (response.success) {
@@ -105,7 +99,6 @@ export const fetchCurrentUser = createAsyncThunk<
       params.router.push("/");
     }
 
-    // הצגת הודעת שגיאה אם נדרש
     if (params?.showAuthError !== false) {
       dispatch(
         showSnackBar({
@@ -122,7 +115,6 @@ export const fetchCurrentUser = createAsyncThunk<
       message: "נכשל בהבאת נתוני המשתמש",
     });
   } catch (error: any) {
-    // אם יש שגיאה, נתק את המשתמש ונתב לעמוד הבית
     localStorage.removeItem("token");
     if (
       params?.router &&
@@ -132,7 +124,6 @@ export const fetchCurrentUser = createAsyncThunk<
       params.router.push("/");
     }
 
-    // הצגת הודעת שגיאה אם נדרש
     if (params?.showAuthError !== false) {
       dispatch(
         showSnackBar({
@@ -147,16 +138,13 @@ export const fetchCurrentUser = createAsyncThunk<
   }
 });
 
-// פונקציית התנתקות
 export const logoutUser = createAsyncThunk<
   void,
   { router?: any; showMessage?: boolean } | undefined,
   { dispatch: any }
 >("user/logoutUser", async (params, { dispatch }) => {
-  // מחק את הטוקן
   localStorage.removeItem("token");
 
-  // הצג הודעת התנתקות אם נדרש
   if (params?.showMessage !== false) {
     dispatch(
       showSnackBar({
@@ -167,7 +155,6 @@ export const logoutUser = createAsyncThunk<
     );
   }
 
-  // נתב לעמוד הבית אם לא נמצאים בעמוד ציבורי וקיים ראוטר
   if (
     params?.router &&
     params.router.pathname !== "/" &&
@@ -177,47 +164,48 @@ export const logoutUser = createAsyncThunk<
   }
 });
 
-// סלייס המשתמש
 const userSlice = createSlice({
   name: "user",
   initialState,
   reducers: {
-    // הגדרת המשתמש במצב
     setUser: (state, action: PayloadAction<User>) => {
       state.user = action.payload;
       state.error = null;
+      state.isAuthenticating = false;
     },
 
-    // התנתקות מהמערכת
     logout: (state) => {
       state.user = null;
+      state.isAuthenticating = false;
     },
 
-    // ניקוי שגיאות
     clearError: (state) => {
       state.error = null;
     },
 
-    // הגדרת שגיאה
     setError: (state, action: PayloadAction<APIError>) => {
       state.error = action.payload;
     },
 
-    // הגדרת מצב טעינה
     setLoading: (state, action: PayloadAction<boolean>) => {
       state.loading = action.payload;
+    },
+
+    setAuthenticating: (state, action: PayloadAction<boolean>) => {
+      state.isAuthenticating = action.payload;
     },
   },
   extraReducers: (builder) => {
     builder
-      // טיפול במצבי fetchCurrentUser
       .addCase(fetchCurrentUser.pending, (state) => {
         state.loading = true;
         state.error = null;
+        state.isAuthenticating = true;
       })
       .addCase(fetchCurrentUser.fulfilled, (state, action) => {
         state.user = action.payload;
         state.loading = false;
+        state.isAuthenticating = false;
       })
       .addCase(fetchCurrentUser.rejected, (state, action) => {
         state.user = null;
@@ -227,18 +215,23 @@ const userSlice = createSlice({
           status: "error",
           message: "האימות נכשל",
         };
+        state.isAuthenticating = false;
       })
-      // טיפול בהתנתקות
       .addCase(logoutUser.fulfilled, (state) => {
         state.user = null;
         state.loading = false;
+        state.isAuthenticating = false;
       });
   },
 });
 
-// ייצוא פעולות
-export const { setUser, logout, clearError, setError, setLoading } =
-  userSlice.actions;
+export const {
+  setUser,
+  logout,
+  clearError,
+  setError,
+  setLoading,
+  setAuthenticating,
+} = userSlice.actions;
 
-// ייצוא הרדיוסר
 export default userSlice.reducer;
