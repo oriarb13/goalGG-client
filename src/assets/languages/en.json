@@ -6,6 +6,15 @@
     "submit": "Submit",
     "auth": "Authentication error"
   },
+  "snackbar": {
+    "sessionExpired": "Session expired, please log in again",
+    "loginRequired": "You need to log in to access this page",
+    "logoutSuccess": "You have been logged out successfully",
+    "authenticationFailed": "Authentication failed",
+    "connectionError": "Connection error",
+    "userCreationFailed": "Failed to create user",
+    "loginError": "Email or password is incorrect"
+  },
   "mainMenu": {
     "logout": "Logout",
     "profile": "Profile",
@@ -78,6 +87,6 @@
     "playWithYourFriends": "Create or join Clubs and Play with Your Friends",
     "friends": "Find new Friends",
     "or": "Or",
-    "fields": "Find a Field "
+    "fields": "Find a Field"
   }
 }

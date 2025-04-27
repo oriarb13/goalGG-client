@@ -2,7 +2,10 @@ import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
 import userService from "@/api/services/userService";
 import { User } from "@/types/types";
 import { showSnackBar } from "@/store/snackBarSlice";
+import { AppDispatch } from "./store";
+import { NextRouter } from "next/router";
 
+// Define error structure for API responses
 interface APIError {
   success: boolean;
   status: string;
@@ -10,6 +13,7 @@ interface APIError {
   stack?: string;
 }
 
+// Define the shape of the user state in the Redux store
 interface UserState {
   user: User | null;
   loading: boolean;
@@ -17,6 +21,7 @@ interface UserState {
   isAuthenticating: boolean;
 }
 
+// Initial state for the user slice
 const initialState: UserState = {
   user: null,
   loading: false,
@@ -24,12 +29,13 @@ const initialState: UserState = {
   isAuthenticating: true,
 };
 
+// Helper function to standardize error handling
 const handleApiError = (error: any): APIError => {
   if (error?.response?.data && !error.response.data.success) {
     return {
       success: false,
       status: error.response.data.status || "fail",
-      message: error.response.data.message || "שגיאת שרת",
+      message: error.response.data.message || "Server error",
       stack: error.response.data.stack,
     };
   }
@@ -45,14 +51,54 @@ const handleApiError = (error: any): APIError => {
   return {
     success: false,
     status: "error",
-    message: error?.message || "אירעה שגיאה לא ידועה",
+    message: error?.message || "An unknown error occurred",
   };
 };
 
+// Async thunk to check user authentication
+export const checkAuthentication = createAsyncThunk<
+  boolean,
+  { showAuthError?: boolean; router?: NextRouter } | undefined,
+  { state: { user: UserState }; dispatch: AppDispatch }
+>("user/checkAuthentication", async (params, { dispatch, getState }) => {
+  const token = localStorage.getItem("token");
+  const currentUser = getState().user.user;
+
+  // If no token but user exists in state, log out
+  if (!token && currentUser) {
+    // Logout user from Redux
+    dispatch(logout());
+
+    // Show authentication error if requested
+    if (params?.showAuthError !== false) {
+      dispatch(
+        showSnackBar({
+          message: "Session expired, please log in again",
+          severity: "error",
+          show: true,
+        })
+      );
+    }
+
+    // Handle redirection if router is provided
+    if (params?.router) {
+      const publicRoutes = ["/", "/about"];
+      if (!publicRoutes.includes(params.router.pathname)) {
+        params.router.push("/");
+      }
+    }
+
+    return false;
+  }
+
+  return !!token && !!currentUser;
+});
+
+// Async thunk to fetch current user details
 export const fetchCurrentUser = createAsyncThunk<
   User,
-  { router?: any; showAuthError?: boolean } | undefined,
-  { rejectValue: APIError; dispatch: any }
+  { router?: NextRouter; showAuthError?: boolean } | undefined,
+  { rejectValue: APIError; dispatch: AppDispatch }
 >("user/fetchCurrentUser", async (params, { rejectWithValue, dispatch }) => {
   try {
     const token = localStorage.getItem("token");
@@ -70,7 +116,7 @@ export const fetchCurrentUser = createAsyncThunk<
       if (params?.showAuthError !== false) {
         dispatch(
           showSnackBar({
-            message: "עליך להתחבר למערכת",
+            message: "You need to log in to access this page",
             severity: "error",
             show: true,
           })
@@ -80,7 +126,7 @@ export const fetchCurrentUser = createAsyncThunk<
       return rejectWithValue({
         success: false,
         status: "fail",
-        message: "אין טוקן אימות",
+        message: "No authentication token",
       });
     }
 
@@ -102,7 +148,7 @@ export const fetchCurrentUser = createAsyncThunk<
     if (params?.showAuthError !== false) {
       dispatch(
         showSnackBar({
-          message: "ההתחברות נכשלה, נא להתחבר מחדש",
+          message: "Authentication failed, please log in again",
           severity: "error",
           show: true,
         })
@@ -112,7 +158,7 @@ export const fetchCurrentUser = createAsyncThunk<
     return rejectWithValue({
       success: false,
       status: "fail",
-      message: "נכשל בהבאת נתוני המשתמש",
+      message: "Failed to fetch user data",
     });
   } catch (error: any) {
     localStorage.removeItem("token");
@@ -127,7 +173,7 @@ export const fetchCurrentUser = createAsyncThunk<
     if (params?.showAuthError !== false) {
       dispatch(
         showSnackBar({
-          message: "ההתחברות נכשלה, נא להתחבר מחדש",
+          message: "Authentication failed, please log in again",
           severity: "error",
           show: true,
         })
@@ -138,17 +184,18 @@ export const fetchCurrentUser = createAsyncThunk<
   }
 });
 
+// Async thunk to log out user
 export const logoutUser = createAsyncThunk<
   void,
-  { router?: any; showMessage?: boolean } | undefined,
-  { dispatch: any }
+  { router?: NextRouter; showMessage?: boolean } | undefined,
+  { dispatch: AppDispatch }
 >("user/logoutUser", async (params, { dispatch }) => {
   localStorage.removeItem("token");
 
   if (params?.showMessage !== false) {
     dispatch(
       showSnackBar({
-        message: "התנתקת מהמערכת בהצלחה",
+        message: "You have been logged out successfully",
         severity: "success",
         show: true,
       })
@@ -164,33 +211,40 @@ export const logoutUser = createAsyncThunk<
   }
 });
 
+// Create the user slice with reducers and extra reducers
 const userSlice = createSlice({
   name: "user",
   initialState,
   reducers: {
+    // Set user in state
     setUser: (state, action: PayloadAction<User>) => {
       state.user = action.payload;
       state.error = null;
       state.isAuthenticating = false;
     },
 
+    // Logout action for the reducer
     logout: (state) => {
       state.user = null;
       state.isAuthenticating = false;
     },
 
+    // Clear any existing errors
     clearError: (state) => {
       state.error = null;
     },
 
+    // Manually set an error in state
     setError: (state, action: PayloadAction<APIError>) => {
       state.error = action.payload;
     },
 
+    // Set loading state
     setLoading: (state, action: PayloadAction<boolean>) => {
       state.loading = action.payload;
     },
 
+    // Set authenticating state
     setAuthenticating: (state, action: PayloadAction<boolean>) => {
       state.isAuthenticating = action.payload;
     },
@@ -213,7 +267,7 @@ const userSlice = createSlice({
         state.error = action.payload || {
           success: false,
           status: "error",
-          message: "האימות נכשל",
+          message: "Authentication failed",
         };
         state.isAuthenticating = false;
       })
@@ -221,7 +275,8 @@ const userSlice = createSlice({
         state.user = null;
         state.loading = false;
         state.isAuthenticating = false;
-      });
+      })
+      .addCase(checkAuthentication.fulfilled, () => {});
   },
 });
 

@@ -12,7 +12,7 @@ import logoImage from "@/assets/images/logo.png";
 import ProfileSection from "./ProfileSection";
 // Redux imports
 import { useAppDispatch, useAppSelector } from "@/store/store";
-import { logout } from "@/store/userSlice";
+import { logout, checkAuthentication } from "@/store/userSlice";
 
 interface MenuItem {
   icon?: React.ReactNode;
@@ -28,7 +28,7 @@ const MainMenu = () => {
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
   const [isSignUpModalOpen, setIsSignUpModalOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
-  const [isSettingsDropdownOpen, setIsSettingsDropdownOpen] = useState(false);
+  const dispatch = useAppDispatch();
 
   // Check if we're on mobile
   useEffect(() => {
@@ -44,6 +44,19 @@ const MainMenu = () => {
     };
   }, []);
 
+  // Add token check periodically for menu state
+  useEffect(() => {
+    // Check on initial render
+    dispatch(checkAuthentication());
+
+    // Check every 10 seconds
+    const interval = setInterval(() => {
+      dispatch(checkAuthentication());
+    }, 10000);
+
+    return () => clearInterval(interval);
+  }, [dispatch]);
+
   // Close mobile menu when route changes
   useEffect(() => {
     setIsMobileMenuOpen(false);
@@ -52,7 +65,11 @@ const MainMenu = () => {
   const { user, loading, isAuthenticating } = useAppSelector(
     (state) => state.user
   );
-  const dispatch = useAppDispatch();
+
+  const handleLogout = () => {
+    dispatch(logout());
+    router.push("/");
+  };
 
   const landingPageMenuItems: MenuItem[] = [
     {
@@ -99,6 +116,11 @@ const MainMenu = () => {
       icon: <ProfileSection />,
       onClick: () => {},
     },
+    {
+      label: t("mainMenu.logout"),
+      isClicked: false,
+      onClick: handleLogout,
+    },
   ];
 
   const openLoginModal = () => {
@@ -119,6 +141,11 @@ const MainMenu = () => {
   if (isAuthenticating || loading) {
     return null;
   }
+
+  // Check for token before rendering user menu items
+  const hasToken =
+    typeof window !== "undefined" && !!localStorage.getItem("token");
+  const shouldShowUserMenu = user && hasToken;
 
   return (
     <>
@@ -156,7 +183,7 @@ const MainMenu = () => {
             </Button>
 
             {/* landing page menu items */}
-            {!user &&
+            {!shouldShowUserMenu &&
               landingPageMenuItems.map((item, index) => (
                 <Button
                   key={index}
@@ -172,7 +199,7 @@ const MainMenu = () => {
               ))}
 
             {/* connected user menu items */}
-            {user &&
+            {shouldShowUserMenu &&
               connectedUserMenuItems.map((item, index) => (
                 <Button
                   key={index}
@@ -222,21 +249,34 @@ const MainMenu = () => {
             </Button>
           </div>
           <div className="flex-1 flex flex-col p-4 space-y-4">
-            {/* landing page menu items */}
-            {!user &&
-              landingPageMenuItems.map((item, index) => (
-                <Button
-                  key={index}
-                  variant={item.isClicked ? "default" : "ghost"}
-                  onClick={item.onClick}
-                  className={cn(
-                    "justify-start text-base w-full",
-                    item.isClicked && "bg-primary text-primary-foreground"
-                  )}
-                >
-                  {item.label}
-                </Button>
-              ))}
+            {/* Mobile menu items - check token here too */}
+            {!shouldShowUserMenu
+              ? landingPageMenuItems.map((item, index) => (
+                  <Button
+                    key={index}
+                    variant={item.isClicked ? "default" : "ghost"}
+                    onClick={item.onClick}
+                    className={cn(
+                      "justify-start text-base w-full",
+                      item.isClicked && "bg-primary text-primary-foreground"
+                    )}
+                  >
+                    {item.label}
+                  </Button>
+                ))
+              : connectedUserMenuItems.map((item, index) => (
+                  <Button
+                    key={index}
+                    variant={item.isClicked ? "default" : "ghost"}
+                    onClick={item.onClick}
+                    className={cn(
+                      "justify-start text-base w-full",
+                      item.isClicked && "bg-primary text-primary-foreground"
+                    )}
+                  >
+                    {item.label === "Profile" ? <ProfileSection /> : item.label}
+                  </Button>
+                ))}
             <LanguageSelectMenu isMobile={true} />
           </div>
         </div>
