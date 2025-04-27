@@ -67,6 +67,8 @@
     "lastNamePlaceholder": "Enter your last name",
     "sportCategoryLabel": "Sport Category",
     "sportFootball": "Football",
-    "sportBasketball": "Basketball"
+    "sportBasketball": "Basketball",
+    "userCreatedSuccessfully": "User created successfully",
+    "failed": "Failed to create user"
   }
 }

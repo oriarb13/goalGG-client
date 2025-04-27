@@ -40,6 +40,8 @@ const signUpSchema = z
     firstName: z.string().min(2, { message: "First name is required" }),
     lastName: z.string().min(2, { message: "Last name is required" }),
     phone: z.string().min(1, { message: "Phone number is required" }),
+    phonePrefix: z.string().min(1, { message: "Phone prefix is required" }),
+    phoneNumber: z.string().min(1, { message: "Phone number is required" }),
     email: z.string().email({ message: "Valid email is required" }),
     password: z
       .string()
@@ -77,6 +79,8 @@ export const SignUpModal = ({
     firstName: "",
     lastName: "",
     phone: "",
+    phonePrefix: "+972", // Default phone prefix
+    phoneNumber: "", // Actual phone number
     email: "",
     password: "",
     confirmPassword: "",
@@ -92,6 +96,7 @@ export const SignUpModal = ({
   const [showPassword, setShowPassword] = useState(false);
   const { mutateAsync: register, isPending: isRegisterLoading } = useRegister();
   const [isFailed, setIsFailed] = useState(false);
+  const [isSuccess, setIsSuccess] = useState(false);
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
@@ -112,6 +117,22 @@ export const SignUpModal = ({
     setFormData((prev) => ({ ...prev, agreeToTerms: checked }));
     if (errors.agreeToTerms) {
       setErrors((prev) => ({ ...prev, agreeToTerms: "" }));
+    }
+  };
+
+  const handlePhoneChange = (
+    value: string,
+    metadata?: { prefix: string; number: string }
+  ) => {
+    setFormData((prev) => ({
+      ...prev,
+      phone: value || "",
+      phonePrefix: metadata?.prefix || prev.phonePrefix,
+      phoneNumber: metadata?.number || prev.phoneNumber,
+    }));
+
+    if (errors.phone) {
+      setErrors((prev) => ({ ...prev, phone: "" }));
     }
   };
 
@@ -146,18 +167,29 @@ export const SignUpModal = ({
     }
 
     try {
+      // Prepare the data for submission with the phone object
       const submitData = {
         ...formData,
         yearOfBirth: parseInt(formData.yearOfBirth, 10),
         phone: {
-          prefix: "+972", // Default prefix, you might want to extract this from the phone input
-          number: formData.phone.replace(/\D/g, ""), // Remove non-digit characters
+          prefix: formData.phonePrefix,
+          number: formData.phoneNumber,
         },
+        // Remove the extra fields that are not needed in the API
+        phonePrefix: undefined,
+        phoneNumber: undefined,
       };
+
       await register(submitData);
+      setIsSuccess(true);
     } catch (error) {
       console.log("Registration error:", error);
       setIsFailed(true);
+      setTimeout(() => {
+        onClose();
+        setIsSuccess(false);
+        setIsFailed(false);
+      }, 5000);
     } finally {
       setIsLoading(false);
     }
@@ -233,9 +265,7 @@ export const SignUpModal = ({
             <PhoneInput
               className="border-gray-400"
               value={formData.phone}
-              onChange={(value) => {
-                setFormData((prev) => ({ ...prev, phone: value || "" }));
-              }}
+              onChange={handlePhoneChange}
               international
               initialValueFormat="national"
               defaultCountry="IL"
@@ -439,6 +469,11 @@ export const SignUpModal = ({
               {isRegisterLoading ? <DotsLoader size={5} /> : t("common.submit")}
             </Button>
           </DialogFooter>
+          {!isSuccess && (
+            <p className="text-xl pt-5 text-center text-amber-500">
+              {t("signup.userCreatedSuccessfully")}
+            </p>
+          )}
         </form>
       </DialogContent>
     </Dialog>
