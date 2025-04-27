@@ -1,15 +1,9 @@
 import { NextPage } from "next";
-import { MainLayout } from "@/ui/layouts/MainLayout";
-import { IndexWidget } from "@/ui/widgets/IndexWidget";
+import { IndexWidget } from "@/ui/widgets/indexWidget/IndexWidget";
 
-const Home: NextPage & {
-  getLayout?: (page: React.ReactNode) => React.ReactNode;
-} = () => {
+const Home: NextPage = () => {
   return <IndexWidget />;
 };
 
-Home.getLayout = function getLayout(page: React.ReactNode) {
-  return <MainLayout>{page}</MainLayout>;
-};
 
 export default Home;

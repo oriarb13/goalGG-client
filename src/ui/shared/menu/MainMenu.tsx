@@ -9,6 +9,11 @@ import { LanguageSelectMenu } from "./LanguageSelectMenu";
 import { LoginModal } from "./LoginModal";
 import { SignUpModal } from "./SignupModal";
 import logoImage from "@/assets/images/logo.png";
+
+// Redux imports
+import { useAppDispatch, useAppSelector } from "@/store/store";
+import { logout } from "@/store/userSlice";
+
 interface MenuItem {
   icon?: React.ReactNode;
   label: string;
@@ -23,7 +28,12 @@ const MainMenu = () => {
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
   const [isSignUpModalOpen, setIsSignUpModalOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
-  console.log("isMobile", isMobile);
+  const [isSettingsDropdownOpen, setIsSettingsDropdownOpen] = useState(false);
+
+  const user = useAppSelector((state) => state.user.user);
+  const dispatch = useAppDispatch();
+  console.log("user", user);
+
   // Check if we're on mobile
   useEffect(() => {
     const checkIfMobile = () => {
@@ -45,13 +55,6 @@ const MainMenu = () => {
 
   const landingPageMenuItems: MenuItem[] = [
     {
-      label: t("mainMenu.ourStory"),
-      isClicked: router.asPath === "/about",
-      onClick: () => {
-        router.push("/about");
-      },
-    },
-    {
       label: t("mainMenu.login"),
       isClicked: false,
       onClick: () => {
@@ -67,8 +70,45 @@ const MainMenu = () => {
     },
   ];
 
+  const connectedUserMenuItems: MenuItem[] = [
+    {
+      label: t("mainMenu.main"),
+      isClicked: false,
+      onClick: () => {
+        router.push("/main");
+      },
+    },
+    {
+      label: t("mainMenu.field"),
+      isClicked: false,
+      onClick: () => {
+        router.push("/field");
+      },
+    },
+    {
+      label: t("mainMenu.groups"),
+      isClicked: false,
+      onClick: () => {
+        router.push("/groups");
+      },
+    },
+    {
+      label: t("mainMenu.profile"),
+      isClicked: false,
+      onClick: () => {
+        router.push("/profile");
+      },
+    },
+    {
+      label: t("mainMenu.logout"),
+      isClicked: false,
+      onClick: () => {
+        dispatch(logout());
+      },
+    },
+  ];
+
   const openLoginModal = () => {
-    console.log("openLoginModal");
     setIsSignUpModalOpen(false);
     setTimeout(() => {
       setIsLoginModalOpen(true);
@@ -76,7 +116,6 @@ const MainMenu = () => {
   };
 
   const openSignUpModal = () => {
-    console.log("openSignUpModal");
     setIsLoginModalOpen(false);
     setTimeout(() => {
       setIsSignUpModalOpen(true);
@@ -106,19 +145,49 @@ const MainMenu = () => {
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex  justify-around w-full">
-            {landingPageMenuItems.map((item, index) => (
-              <Button
-                key={index}
-                variant={item.isClicked ? "default" : "ghost"}
-                onClick={item.onClick}
-                className={cn(
-                  "text-base",
-                  item.isClicked && "bg-primary text-primary-foreground"
-                )}
-              >
-                {item.label}
-              </Button>
-            ))}
+            <Button
+              variant={router.asPath === "/about" ? "default" : "ghost"}
+              onClick={() => router.push("/about")}
+              className={cn(
+                "text-base",
+                router.asPath === "/about" &&
+                  "bg-primary text-primary-foreground"
+              )}
+            >
+              {t("mainMenu.ourStory")}
+            </Button>
+
+            {/* landing page menu items */}
+            {!user &&
+              landingPageMenuItems.map((item, index) => (
+                <Button
+                  key={index}
+                  variant={item.isClicked ? "default" : "ghost"}
+                  onClick={item.onClick}
+                  className={cn(
+                    "text-base",
+                    item.isClicked && "bg-primary text-primary-foreground"
+                  )}
+                >
+                  {item.label}
+                </Button>
+              ))}
+
+            {/* connected user menu items */}
+            {user &&
+              connectedUserMenuItems.map((item, index) => (
+                <Button
+                  key={index}
+                  variant={item.isClicked ? "default" : "ghost"}
+                  onClick={item.onClick}
+                  className={cn(
+                    "text-base",
+                    item.isClicked && "bg-primary text-primary-foreground"
+                  )}
+                >
+                  {item.label}
+                </Button>
+              ))}
             <LanguageSelectMenu />
           </div>
 
@@ -155,19 +224,21 @@ const MainMenu = () => {
             </Button>
           </div>
           <div className="flex-1 flex flex-col p-4 space-y-4">
-            {landingPageMenuItems.map((item, index) => (
-              <Button
-                key={index}
-                variant={item.isClicked ? "default" : "ghost"}
-                onClick={item.onClick}
-                className={cn(
-                  "justify-start text-base w-full",
-                  item.isClicked && "bg-primary text-primary-foreground"
-                )}
-              >
-                {item.label}
-              </Button>
-            ))}
+            {/* landing page menu items */}
+            {!user &&
+              landingPageMenuItems.map((item, index) => (
+                <Button
+                  key={index}
+                  variant={item.isClicked ? "default" : "ghost"}
+                  onClick={item.onClick}
+                  className={cn(
+                    "justify-start text-base w-full",
+                    item.isClicked && "bg-primary text-primary-foreground"
+                  )}
+                >
+                  {item.label}
+                </Button>
+              ))}
             <LanguageSelectMenu isMobile={true} />
           </div>
         </div>

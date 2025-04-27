@@ -30,11 +30,9 @@ export function changeLanguage(lang: string) {
   if (supportedLanguages.includes(lang)) {
     i18n.changeLanguage(lang);
     document.documentElement.lang = lang;
-    // document.documentElement.dir = ['he', 'ar'].includes(lang) ? 'rtl' : 'ltr';
   }
 }
 
-// בדיקה אם יש שפה שמורה בלוקאל סטורג'
 if (typeof window !== 'undefined') {
   const savedLanguage = localStorage.getItem('language');
   if (savedLanguage && supportedLanguages.includes(savedLanguage)) {

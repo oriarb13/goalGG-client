@@ -3,7 +3,8 @@
   "common": {
     "loading": "Loading...",
     "cancel": "Cancel",
-    "submit": "Submit"
+    "submit": "Submit",
+    "auth": "Authentication error"
   },
   "mainMenu": {
     "logout": "Logout",

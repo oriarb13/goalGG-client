@@ -1,9 +1,7 @@
-const about = () => {
-  return (
-    <div>
-      <h1>About</h1>
-    </div>
-  );
+import AboutWidget from "@/ui/widgets/aboutWidget/AboutWidget";
+
+const About = () => {
+  return <AboutWidget />;
 };
 
-export default about;
+export default About;

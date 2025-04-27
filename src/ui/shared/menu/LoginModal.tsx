@@ -96,7 +96,7 @@ export const LoginModal = ({
       onClose();
 
       // Navigate to dashboard after successful login
-      router.push("/home");
+      router.push("/main");
     } catch (error) {
       setIsFailed(true);
       console.log(error);

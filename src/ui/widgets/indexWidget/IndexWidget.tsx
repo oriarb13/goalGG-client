@@ -3,7 +3,7 @@ import { useTranslation } from "react-i18next";
 import friendsImage from "@/assets/images/friends.png";
 import friendsbasketballImage from "@/assets/images/friendsbasketball.png";
 
-import { Card } from "../shadCN/card";
+import { Card } from "@/ui/shadCN/card";
 const IndexWidget = () => {
   const { t } = useTranslation();
 

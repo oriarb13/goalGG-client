@@ -1,19 +1,24 @@
 import { configureStore } from "@reduxjs/toolkit";
 import userReducer from "./userSlice";
 import languageReducer from "./languageSlice";
-
+import snackBarReducer from "./snackBarSlice";
 export const store = configureStore({
   reducer: {
     user: userReducer,
     language: languageReducer,
+    snackBar: snackBarReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
       serializableCheck: {
         // Ignore these action types
-        ignoredActions: [ 'auth/fetchCurrentUser/fulfilled'],
+        ignoredActions: [
+          "auth/fetchCurrentUser/fulfilled",
+          "snackBar/showSnackBar",
+          "snackBar/hideSnackBar",
+        ],
         // Ignore these field paths in all actions
-        ignoredPaths: ['auth.user.createdAt', 'auth.user.updatedAt'],
+        ignoredPaths: ["auth.user.createdAt", "auth.user.updatedAt"],
       },
     }),
 });

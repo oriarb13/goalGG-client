@@ -1,7 +1,7 @@
 import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
 import userService from "@/api/services/userService";
 import { User } from "@/types/types";
-import { AxiosError } from "axios";
+import { showSnackBar } from "@/store/snackBarSlice";
 
 // מבנה השגיאות מהשרת
 interface APIError {
@@ -54,13 +54,13 @@ const handleApiError = (error: any): APIError => {
 // פונקציה אחת שמטפלת בהבאת המשתמש ועדכון הסטייט
 export const fetchCurrentUser = createAsyncThunk<
   User,
-  { router?: any } | undefined, // הפרמטר הוא אופציונלי
-  { rejectValue: APIError }
->("user/fetchCurrentUser", async (params, { rejectWithValue }) => {
+  { router?: any; showAuthError?: boolean } | undefined, // הוספת אפשרות להצגת הודעת שגיאה
+  { rejectValue: APIError; dispatch: any }
+>("user/fetchCurrentUser", async (params, { rejectWithValue, dispatch }) => {
   try {
     const token = localStorage.getItem("token");
 
-    // אם אין טוקן, נתק את המשתמש ונתב לעמוד הבית
+    // auth
     if (!token) {
       if (
         params?.router &&
@@ -70,6 +70,18 @@ export const fetchCurrentUser = createAsyncThunk<
         params.router.push("/");
       }
       localStorage.removeItem("token");
+
+      // שימוש ב-dispatch שמועבר על ידי redux-thunk
+      if (params?.showAuthError !== false) {
+        dispatch(
+          showSnackBar({
+            message: "עליך להתחבר למערכת",
+            severity: "error",
+            show: true,
+          })
+        );
+      }
+
       return rejectWithValue({
         success: false,
         status: "fail",
@@ -77,14 +89,13 @@ export const fetchCurrentUser = createAsyncThunk<
       });
     }
 
-    // קריאה לשרת להבאת המשתמש
+    // get user
     const response = await userService.getConnectedUser();
 
     if (response.success) {
       return response.data;
     }
 
-    // אם הקריאה נכשלה, נתק את המשתמש ונתב לעמוד הבית
     localStorage.removeItem("token");
     if (
       params?.router &&
@@ -92,6 +103,17 @@ export const fetchCurrentUser = createAsyncThunk<
       params.router.pathname !== "/about"
     ) {
       params.router.push("/");
+    }
+
+    // הצגת הודעת שגיאה אם נדרש
+    if (params?.showAuthError !== false) {
+      dispatch(
+        showSnackBar({
+          message: "ההתחברות נכשלה, נא להתחבר מחדש",
+          severity: "error",
+          show: true,
+        })
+      );
     }
 
     return rejectWithValue({
@@ -110,27 +132,50 @@ export const fetchCurrentUser = createAsyncThunk<
       params.router.push("/");
     }
 
+    // הצגת הודעת שגיאה אם נדרש
+    if (params?.showAuthError !== false) {
+      dispatch(
+        showSnackBar({
+          message: "ההתחברות נכשלה, נא להתחבר מחדש",
+          severity: "error",
+          show: true,
+        })
+      );
+    }
+
     return rejectWithValue(handleApiError(error));
   }
 });
 
 // פונקציית התנתקות
-export const logoutUser = createAsyncThunk<void, { router?: any } | undefined>(
-  "user/logoutUser",
-  async (params) => {
-    // מחק את הטוקן
-    localStorage.removeItem("token");
+export const logoutUser = createAsyncThunk<
+  void,
+  { router?: any; showMessage?: boolean } | undefined,
+  { dispatch: any }
+>("user/logoutUser", async (params, { dispatch }) => {
+  // מחק את הטוקן
+  localStorage.removeItem("token");
 
-    // נתב לעמוד הבית אם לא נמצאים בעמוד ציבורי וקיים ראוטר
-    if (
-      params?.router &&
-      params.router.pathname !== "/" &&
-      params.router.pathname !== "/about"
-    ) {
-      params.router.push("/");
-    }
+  // הצג הודעת התנתקות אם נדרש
+  if (params?.showMessage !== false) {
+    dispatch(
+      showSnackBar({
+        message: "התנתקת מהמערכת בהצלחה",
+        severity: "success",
+        show: true,
+      })
+    );
   }
-);
+
+  // נתב לעמוד הבית אם לא נמצאים בעמוד ציבורי וקיים ראוטר
+  if (
+    params?.router &&
+    params.router.pathname !== "/" &&
+    params.router.pathname !== "/about"
+  ) {
+    params.router.push("/");
+  }
+});
 
 // סלייס המשתמש
 const userSlice = createSlice({
