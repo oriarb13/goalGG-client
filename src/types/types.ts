@@ -25,7 +25,7 @@ export interface TotalStats {
 
 export interface Subscription {
   groupIds: string[];
-  maxGroups: number;
+  maxClubs: number;
   startDate?: Date;
   endDate?: Date;
   maxPlayers: number;
@@ -58,8 +58,8 @@ export interface User {
   favoriteFields: string[];
   friends: string[];
   friendRequests: string[];
-  groups: string[];
-  groupsRequests: string[];
+  clubs: string[];
+  clubsRequests: string[];
   totalStats: TotalStats;
   subscriptions: Subscription;
   createdAt: Date;

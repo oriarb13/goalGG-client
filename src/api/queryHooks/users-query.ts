@@ -92,7 +92,7 @@ export function useUser(id: string) {
   });
 }
 
-// User groups hooks
+// User clubs hooks
 export function useUsersByGroup(groupId: string) {
   return useQuery({
     queryKey: USERS_QUERY_KEYS.byGroup(groupId),

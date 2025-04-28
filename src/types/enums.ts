@@ -38,7 +38,7 @@ export enum AccountStatusEnum {
   INACTIVE = "INACTIVE",
 }
 
-export enum GroupStatusEnum {
+export enum ClubstatusEnum {
   ACTIVE = "ACTIVE",
   FULL = "FULL",
   INACTIVE = "INACTIVE",

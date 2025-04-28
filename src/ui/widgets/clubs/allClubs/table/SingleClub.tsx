@@ -11,14 +11,22 @@ import {
 } from "@radix-ui/react-dropdown-menu";
 import { BasketballIcon } from "@/assets/icons/Basketball.icon";
 import { FootballIcon } from "@/assets/icons/football.icon";
-import { MapPinIcon, UsersIcon, InfoIcon } from "lucide-react";
+import {
+  MapPinIcon,
+  UsersIcon,
+  InfoIcon,
+  LogOutIcon,
+  XIcon,
+  UserPlusIcon,
+} from "lucide-react";
 import { DropdownMenu } from "@radix-ui/react-dropdown-menu";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 
 interface SingleClubProps {
   club: IClub;
   user: User;
 }
+
 const SingleClub = ({ club, user }: SingleClubProps) => {
   const { t } = useTranslation();
   const [userCoords, setUserCoords] = useState<{
@@ -27,6 +35,17 @@ const SingleClub = ({ club, user }: SingleClubProps) => {
   } | null>(null);
   const [distance, setDistance] = useState<string | number>("לא צוין");
   const [isLoading, setIsLoading] = useState(true);
+
+  // Determine the user's relationship with the club
+  const clubRelationship = useMemo(() => {
+    if (user?.clubs?.includes(club._id)) {
+      return "member";
+    } else if (user?.clubsRequests?.includes(club._id)) {
+      return "pending";
+    } else {
+      return "none";
+    }
+  }, [user?.clubs, user?.clubsRequests, club._id]);
 
   // Get user location when component mounts
   useEffect(() => {
@@ -89,6 +108,44 @@ const SingleClub = ({ club, user }: SingleClubProps) => {
         return t("club.full") || "מלא";
       default:
         return club.status;
+    }
+  };
+
+  // Render the appropriate action button based on the user's relationship with the club
+  const renderActionButton = () => {
+    switch (clubRelationship) {
+      case "member":
+        return (
+          <Button
+            className="bg-red-600 hover:bg-red-700 text-white px-4 rounded-full transition-all duration-300 transform hover:scale-105 flex items-center gap-1"
+            onClick={() => console.log("Leave club", club._id)}
+          >
+            <LogOutIcon className="h-4 w-4" />
+            {t("club.leave")}
+          </Button>
+        );
+      case "pending":
+        return (
+          <Button
+            className="bg-orange-500 hover:bg-orange-600 text-white px-4 rounded-full transition-all duration-300 transform hover:scale-105 flex items-center gap-1"
+            onClick={() => console.log("Cancel request", club._id)}
+          >
+            <XIcon className="h-4 w-4" />
+            {t("club.cancelRequest")}
+          </Button>
+        );
+      case "none":
+        return (
+          <Button
+            className="bg-emerald-600 hover:bg-emerald-700 text-white px-4 rounded-full transition-all duration-300 transform hover:scale-105 flex items-center gap-1"
+            onClick={() => console.log("Join club", club._id)}
+          >
+            <UserPlusIcon className="h-4 w-4" />
+            {t("club.join")}
+          </Button>
+        );
+      default:
+        return null;
     }
   };
 
@@ -195,6 +252,7 @@ const SingleClub = ({ club, user }: SingleClubProps) => {
               {getStatusText()}
             </span>
           </div>
+
           {/* Members Count */}
           <div className="flex items-center gap-2">
             <div className="bg-blue-100 p-2 rounded-full flex items-center justify-center">
@@ -206,10 +264,8 @@ const SingleClub = ({ club, user }: SingleClubProps) => {
             </span>
           </div>
 
-          {/* Join Button */}
-          <Button className="bg-emerald-600 hover:bg-emerald-700 text-white px-4 rounded-full transition-all duration-300 transform hover:scale-105">
-            {t("club.join")}
-          </Button>
+          {/* Dynamic Action Button */}
+          {renderActionButton()}
         </Card>
       </Card>
     </div>

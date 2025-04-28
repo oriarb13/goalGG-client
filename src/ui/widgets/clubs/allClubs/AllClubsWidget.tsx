@@ -83,9 +83,8 @@ const AllClubsWidget = () => {
         <p className="text-sm mb-6 text-center text-gray-400">
           {t("club.chooseOrCreateClub")}
         </p>
-        <div>{user?.firstName}</div>
 
-        <ClubsTable clubs={clubs} user={user} />
+        <ClubsTable clubs={clubs} user={user!} />
       </div>
     </div>
   );

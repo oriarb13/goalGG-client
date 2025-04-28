@@ -104,10 +104,10 @@ const MainMenu = () => {
       },
     },
     {
-      label: t("mainMenu.groups"),
+      label: t("mainMenu.clubs"),
       isClicked: false,
       onClick: () => {
-        router.push("/groups");
+        router.push("/clubs");
       },
     },
     {
