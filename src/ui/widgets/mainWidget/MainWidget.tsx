@@ -95,7 +95,7 @@ const MainWidget = () => {
         lg:w-1/4 
         rounded-none 
         opacity-90
-        z-100 
+        z-10 
         bg-gradient-to-b 
         from-slate-200 
         via-slate-300 
