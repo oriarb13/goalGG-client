@@ -30,7 +30,7 @@ const initialState: UserState = {
 };
 
 // Helper function to standardize error handling
-const handleApiError = (error: any): APIError => {
+const handleApiError = (error: any) => {
   if (error?.response?.data && !error.response.data.success) {
     return {
       success: false,

@@ -30,18 +30,16 @@ export function AppProvider({ children }: AppProviderProps) {
   const router = useRouter();
   const { t } = useTranslation();
 
-  // Handle initial app setup and authentication
   useEffect(() => {
     if (typeof window !== "undefined") {
-      // Restore saved language preference
+      
       const savedLanguage = localStorage.getItem("language");
       if (savedLanguage) {
         store.dispatch(setLanguage(savedLanguage));
       }
 
-      // Check for existing authentication token
-      const token = localStorage.getItem("token");
 
+      const token = localStorage.getItem("token");
       if (token) {
         // Fetch current user if token exists
         store.dispatch(fetchCurrentUser({ router, showAuthError: false }));

@@ -43,3 +43,39 @@ export enum GroupStatusEnum {
   FULL = "FULL",
   INACTIVE = "INACTIVE",
 }
+
+export enum footballPositionsEnum {
+  GK = "gk",
+  CB = "cb",
+  RB = "rb",
+  LB = "lb",
+  CDM = "cdm",
+  CM = "cm",
+  CAM = "cam",
+  LM = "lm",
+  RM = "rm",
+  CF = "cf",
+  LW = "lw",
+  RW = "rw",
+  ST = "st",
+}
+
+export enum basketballPositionsEnum {
+  PG = "pg",
+  SG = "sg",
+  SF = "sf",
+  PF = "pf",
+  C = "c",
+}
+
+export enum RequestStatusEnum {
+  PENDING = "pending",
+  ACCEPTED = "accepted",
+  REJECTED = "rejected",
+}
+
+export enum ClubStatusEnum {
+  ACTIVE = "active",
+  INACTIVE = "inactive",
+  FULL = "full",
+}

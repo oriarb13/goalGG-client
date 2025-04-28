@@ -46,7 +46,7 @@ const MainWidget = () => {
             className="object-cover"
           />
           <div
-            onClick={() => router.push("/search/clubs")}
+            onClick={() => router.push("/clubs")}
             className="absolute top-0 left-0 w-full h-full bg-black/30 hover:bg-black/50 transition-all duration-300 cursor-pointer flex items-center justify-center"
           >
             {!isMobile && (
@@ -68,7 +68,7 @@ const MainWidget = () => {
             className="object-cover"
           />
           <div
-            onClick={() => router.push("/search/fields")}
+            onClick={() => router.push("/fields")}
             className="absolute top-0 left-0 w-full h-full bg-black/40 hover:bg-black/60 transition-all duration-300 cursor-pointer flex items-center justify-center"
           >
             {!isMobile && (
@@ -107,7 +107,7 @@ const MainWidget = () => {
       >
         <div className="flex flex-col items-center justify-center text-slate-900 h-full">
           <h1
-            onClick={() => isMobile && router.push("/search/clubs")}
+            onClick={() => isMobile && router.push("/clubs")}
             className={`text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold tracking-[0.2em] sm:tracking-[0.3em] md:tracking-[0.4em] lg:tracking-[0.6em] text-center ${
               isMobile
                 ? "cursor-pointer hover:scale-105 transition-transform duration-300"
@@ -120,7 +120,7 @@ const MainWidget = () => {
             {t("main.or")}
           </h1>
           <h1
-            onClick={() => isMobile && router.push("/search/fields")}
+            onClick={() => isMobile && router.push("/fields")}
             className={`text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold tracking-[0.2em] sm:tracking-[0.25em] md:tracking-[0.3em] lg:tracking-[0.4em] text-center ${
               isMobile
                 ? "cursor-pointer hover:scale-105 transition-transform duration-300"

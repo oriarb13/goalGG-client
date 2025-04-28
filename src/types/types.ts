@@ -1,4 +1,9 @@
-import { AccountStatusEnum, SportCategoryEnum, StrongSideEnum } from "./enums";
+import {
+  AccountStatusEnum,
+  ClubStatusEnum,
+  SportCategoryEnum,
+  StrongSideEnum,
+} from "./enums";
 
 import { UserRoleEnum } from "./enums";
 
@@ -59,4 +64,36 @@ export interface User {
   subscriptions: Subscription;
   createdAt: Date;
   updatedAt: Date;
+}
+
+export interface IClub {
+  _id: string;
+  name: string;
+  description?: string;
+  admin: string;
+  captains?: string[];
+  members?: {
+    userId: string;
+    skillRating?: number;
+    positions?: string[];
+    goals?: number;
+    assists?: number;
+    points?: number;
+    matchesCount?: number;
+  }[];
+  pendingRequests?: { userId: string; role: string }[];
+  sportCategory?: SportCategoryEnum;
+  image?: string;
+  status?: ClubStatusEnum;
+  isPrivet?: boolean;
+  maxPlayers?: number;
+  location?: {
+    country?: string;
+    city?: string;
+    address?: string;
+    lat?: number;
+    lng?: number;
+  };
+  createdAt?: Date;
+  updatedAt?: Date;
 }

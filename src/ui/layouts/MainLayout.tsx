@@ -21,7 +21,7 @@ export function MainLayout({ children }: MainLayoutProps) {
   return (
     <div className="h-screen w-full max-h-screen bg-background relative overflow-y-hidden">
       {showLoader && (
-        <div className="fixed bottom-60 left-0 right-0 flex items-center justify-center z-50 h-16">
+        <div className="fixed bottom-60 left-0 right-0 flex items-center justify-center z-1 h-16">
           <BallLoader />
         </div>
       )}
@@ -32,7 +32,7 @@ export function MainLayout({ children }: MainLayoutProps) {
         fill
         priority
         quality={100}
-        className="absolute inset-0 object-cover z-0"
+        className="absolute inset-0 object-cover "
       />
 
       <MainMenu />
